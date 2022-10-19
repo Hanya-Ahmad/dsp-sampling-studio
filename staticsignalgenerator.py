@@ -57,7 +57,7 @@ st.markdown("""
 </style>
 """,unsafe_allow_html=True)
 
-st.write('''# Sine Wave!''')
+st.write('''### Sine Wave''')
 # Generating time data using arange function from numpy
 # time = np.arange(0, 20*np.pi, 0.01) 
 
@@ -79,21 +79,22 @@ if (sampling_checkbox):
     n=np.arange(0,3/T)
     nT=n*T
     if(noise_checkbox):
-        sine_with_noise=np.sin(2 * np.pi * frequency * nT)
+        sine_with_noise=amplitude* np.sin(2 * np.pi * frequency * nT)
         noise=np.random.normal(mean_noise,np.sqrt(noise_watts),len(sine_with_noise))
         sampled_amplitude=noise+sine_with_noise
     else:
-        sampled_amplitude=np.sin(2 * np.pi * frequency * nT )
+        sampled_amplitude=amplitude*np.sin(2 * np.pi * frequency * nT )
 
 
 # Finally displaying the plot
 #plt.show()
-fig=plt.figure(figsize=(9,5))
+def cm_to_inch(value):
+    return value/2.54
+
+fig=plt.figure(figsize=(cm_to_inch(60),cm_to_inch(45)))
 
 
 plt.subplot(211)
-# Settng title for the plot in blue color
-plt.title('Sine Wave', color='b')
 
 # Setting x axis label for the plot
 plt.xlabel('Time'+ r'$\rightarrow$')
@@ -110,16 +111,27 @@ plt.axvline(x=0, color='k')
 
 # Plotting time vs amplitude using plot function from pyplot
 if noise_checkbox:
-    plt.plot(time, noise_signal,'r-')
+    plt.plot(time, noise_signal,label='signal with noise')
 else:
-        plt.plot(time, sine,'r-')
+        plt.plot(time, sine,label='signal')
+plt.legend(fontsize=20, loc='upper right')
 
 
 
 if(sampling_checkbox):
     plt.subplot(212)
+    plt.xlabel('Time'+ r'$\rightarrow$')
 
-    plt.plot(nT,sampled_amplitude)
-    
+# Setting y axis label for the plot
+    plt.ylabel('Sin(time) '+ r'$\rightarrow$')
+        # Showing grid
+    plt.grid()
+
+    # Highlighting axis at x=0 and y=0
+    plt.axhline(y=0, color='k')
+    plt.axvline(x=0, color='k')
+    plt.plot(nT,sampled_amplitude,'r*',label='sampled points')
+    plt.plot(nT,sampled_amplitude,label='reconstructed wave')
+    plt.legend(fontsize=20, loc='upper right')
 
 st.pyplot(fig)

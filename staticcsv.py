@@ -1,6 +1,12 @@
+from distutils.command.upload import upload
+from matplotlib.axis import XAxis,Axis
+from matplotlib.patches import Polygon
 import streamlit as st 
 from streamlit_option_menu import option_menu
 import matplotlib.pyplot as plt 
+import matplotlib as mpl
+from matplotlib.widgets import Slider, Button, RadioButtons
+from mpl_toolkits import axisartist
 import plotly.express as px
 import plotly.figure_factory as ff
 import plotly.graph_objects as go
@@ -11,7 +17,8 @@ import streamlit.components.v1 as components
 import mpld3
 from matplotlib.animation import FuncAnimation
 from tkinter import HORIZONTAL, Menu
-from turtle import width
+from turtle import color, width
+mpl.pyplot.ion()
 
 
 menus= option_menu(menu_title="Select a page.",options=["Sample","Compose"],default_index=0,orientation=HORIZONTAL)
@@ -34,18 +41,43 @@ def generate ():
         
         time= df['time'].tolist()
         amplitude = df['amplitude'].tolist()
-        fig = plt.figure()
-        plt.subplot(211)
-        plt.plot(time, amplitude,label=uploaded_file)
-        plt.xlabel('time', fontsize=15)
-        plt.ylabel('Amplitude', fontsize=15)
-        plt.legend(fontsize=10, loc='upper right')
+        fig, ax = plt.subplots()
+        ax.plot(time, amplitude,color='b')
+
+        ax.grid(True, linestyle='-.')
+        ax.tick_params(labelcolor='r', labelsize='medium', width=3)
+        ax.set_title(uploaded_file.name)
+        
         plt.xlim(9, 10.2)
         plt.ylim(-1, 1.5)
+        plt.xlabel('Time')
+        plt.ylabel('Amplitude')
+        plt.style.use('dark_background')
+        # ax.xaxis.zoom(3)
+        
+        with plt.ion():
+        # interactive mode will be on
+        # figures will automatically be shown
+         fig2 = plt.figure()
 
-        fig_html = mpld3.fig_to_html(fig)
-        plt.tight_layout()
-        components.html(fig_html,height=600)
+        plt.show()
+        st.write(fig)
+
+
+
+      
+       
+        # # plt.subplot(211)
+    
+        
+        # # plt.legend(fontsize=10, loc='upper right')
+        
+        
+        # plt.style.use('dark_background')
+
+
+        
+        # plt.plot(time, amplitude)
         
         
         
