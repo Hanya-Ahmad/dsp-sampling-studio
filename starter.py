@@ -10,27 +10,6 @@ import mpld3
 from matplotlib.animation import FuncAnimation
 from itertools import count
 
-# st.set_option('deprecation.showfileUploaderEncoding', False)
-# st.title("data streaming app")
-# st.sidebar.subheader("visualisation settings")
-# uploaded_file=st.sidebar.file_uploader(label="upload your csv or excel file here", type=['csv', 'xlsx'])
-
-# # global df
-# if uploaded_file is not None:
-#     print("hello")
-#     try:
-#         df=pd.read_csv(uploaded_file)
-#     except Exception as e:
-#         print(e)
-#         df=pd.read_csv() 
-#         print(df.isnull().sum())
-#     else:
-#      print("ebn el wskha msh shaghal")
-
-# try:
-#     st.write(df)
-# except Exception as e:
-#     print(e)
 
 df= pd.read_csv('ECG.csv')
 st.write(df)
