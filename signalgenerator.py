@@ -73,4 +73,4 @@ for i in range(0, n-1, 1):
         else:
             make_chart(df_tmp, select_param,ymin, ymax,'lines')
 
-    time.sleep(0.03)
+    time.sleep(0.03)  

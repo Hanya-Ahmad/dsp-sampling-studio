@@ -58,8 +58,7 @@ def interactive_plot(dataframe):
       amplitude = df['amplitude'].tolist()
       col = st.color_picker('Select a plot color')
     
-      plot = px.line(dataframe,x=time,y=amplitude,width=800,height=600,title=uploaded_file.name,range_x=[9, 10.2],range_y=[-1,1.5],
-       template="plotly_dark")
+      plot = px.line(dataframe,x=time,y=amplitude,width=800,height=600,title=uploaded_file.name,range_x=[9, 10.2],range_y=[-1,1.5], template="plotly_dark")
       plot.update_traces(marker=dict(color=col))
 
       plot.update_xaxes(title_text='Time')
