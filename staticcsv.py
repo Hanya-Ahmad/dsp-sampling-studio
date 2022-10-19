@@ -47,7 +47,7 @@ def generate ():
         plt.tight_layout()
         components.html(fig_html,height=600)
         
-
+    #comment
         
     except Exception as e:
         st.write("Please upload the signal.")
