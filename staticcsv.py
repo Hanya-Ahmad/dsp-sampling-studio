@@ -46,7 +46,6 @@ def generate ():
 
     except Exception as e:
         st.write("You haven't uploaded a signal yet")  
-        print("You haven't uploaded a signal yet")
         print(e)
             
 
@@ -58,30 +57,28 @@ def generate ():
   
 def interactive_plot(dataframe):
     snr_db=0
-
     if(noise_checkbox):
         snr_db=st.number_input("SNR level",value=0,min_value=0,max_value=120,step=5)
-    time= df['time'].tolist()
     amplitude = df['amplitude'].tolist()
+    time= df['time'].tolist()
     col = st.color_picker('Select a plot color')
-    mean=df['amplitude'].mean()
-    std_deviation=df['amplitude'].std()
+
+    #noise variables
     power=df['amplitude']**2
     signal_average_power=np.mean(power)
     signal_averagePower_db=10*np.log10(signal_average_power)
-            
     noise_db=signal_averagePower_db-snr_db
     noise_watts=10**(noise_db/10)
     mean_noise=0
     noise=np.random.normal(mean_noise,np.sqrt(noise_watts),len(df['amplitude']))
+
+    #resulting signal with noise
     noise_signal=df['amplitude']+noise
     if(noise_checkbox):
         plot = px.line(dataframe,x=time,y=noise_signal,width=800,height=600,title=uploaded_file.name,range_x=[9, 10.2],range_y=[-1,1.5], template="plotly_dark")
     else:
         plot = px.line(dataframe,x=time,y=amplitude,width=800,height=600,title=uploaded_file.name,range_x=[9, 10.2],range_y=[-1,1.5], template="plotly_dark")
     plot.update_traces(line=dict(color=col))
-    
-    print('CHECKBOX: ', noise_checkbox)
     plot.update_xaxes(title_text='Time')
     plot.update_yaxes(title_text='amplitude')
      

@@ -17,6 +17,9 @@ import streamlit.components.v1 as components
 
 st.title("Sampling Studio")
 st.sidebar.title("Options")
+"st.session_state object:", st.session_state
+if 'added_signals' not in st.session_state:
+    	st.session_state.added_signals = []
 
 
 # org_freq=st.sidebar.slider("Frequency",min_value=0,max_value=100,value=20,step=5)
@@ -58,10 +61,11 @@ st.markdown("""
 """,unsafe_allow_html=True)
 
 st.write('''### Sine Wave''')
-# Generating time data using arange function from numpy
-# time = np.arange(0, 20*np.pi, 0.01) 
 
-plt.subplot(3,1,1)
+st.write("First")
+st.write(st.session_state)
+
+
 #power signal 
 power=sine**2
 signal_average_power=np.mean(power)
@@ -73,15 +77,27 @@ mean_noise=0
 noise=np.random.normal(mean_noise,np.sqrt(noise_watts),len(sine))
 noise_signal=sine+noise
 
-#adding two waves 
-adding_waves_checkbox=st.sidebar.checkbox("adding waves", value=False)
-if(adding_waves_checkbox):
-    frequency1 = st.sidebar.slider('frequency for wave 1',1, 10, 1, 1)  # freq (Hz)
-    amplitude1=st.sidebar.slider('amplitude for wave 1',1,10,1,1)
-    frequency2 = st.sidebar.slider('frequency for wave 2',1, 10, 1, 1)  # freq (Hz)
-    amplitude2=st.sidebar.slider('amplitude for wave 2',1,10,1,1)
-    final_added_wave=amplitude1 * np.sin(2 * np.pi * frequency1* time)+ amplitude2 * np.sin(2 * np.pi * frequency2* time)
+if(noise_checkbox):
+    st.session_state.added_signals = [{'name':'main','x':time,'y':noise_signal}]
+else:
+   st.session_state.added_signals = [{'name':'main','x':time,'y':sine}] 
 
+#add a signal
+
+def add_signal(label,x,y):
+    st.session_state.added_signals.append({'name':label, 'x':x, 'y':y})
+    
+
+#remove a signal
+def remove_signal(deleted_name):
+    for i in range(len(st.session_state.added_signals)):
+        if st.session_state.added_signals[i]['name']==deleted_name:
+            del st.session_state.added_signals[i]
+            break
+
+adding_waves_checkbox=st.sidebar.checkbox("adding waves", value=False)
+
+    #add_signal(added_label,time,added_sine)
 # Finding amplitude at each time
 #sampling variables
 if (sampling_checkbox):
@@ -126,8 +142,9 @@ else:
         plt.plot(time, sine,label='signal')
 plt.legend(fontsize=20, loc='upper right')
 
-if(adding_waves_checkbox):
-    plt.plot(time, final_added_wave,label='added signals')
+# if(adding_waves_checkbox):
+# plt.subplot(212)
+#plt.plot(time, final_added_wave,label='added signals') '''
 
 if(sampling_checkbox):
     plt.subplot(212)
@@ -143,5 +160,22 @@ if(sampling_checkbox):
     plt.plot(nT,sampled_amplitude,'r*',label='sampled points')
     plt.plot(nT,sampled_amplitude,label='reconstructed wave')
     plt.legend(fontsize=20, loc='upper right')
+#print(st.session_state.added_signals)
+if(adding_waves_checkbox):
+    added_frequency = st.sidebar.slider('frequency for added wave',1, 10, 1, 1)  # freq (Hz)
+    added_amplitude=st.sidebar.slider('amplitude for added wave',1,10,1,1)
+    added_sine=added_amplitude*np.sin(2*np.pi*added_frequency*time)
+    added_label=str(np.random.normal(0,100))
+    add_wave_button=st.sidebar.button("Add Wave")
+    if(add_wave_button):
+        add_signal(added_label,time,added_sine)
+for signal in st.session_state.added_signals:
+    plt.subplot(211)
+    plt.plot(signal['x'], signal['y'],
+            label=signal['name'])
+    plt.legend()
+   
+st.write(st.session_state)
+
 
 st.pyplot(fig)
