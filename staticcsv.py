@@ -1,6 +1,8 @@
 from distutils.command.upload import upload
+from email.policy import default
 from matplotlib.axis import XAxis,Axis
 from matplotlib.patches import Polygon
+from pyparsing import line
 import streamlit as st 
 from streamlit_option_menu import option_menu
 import matplotlib.pyplot as plt 
@@ -23,7 +25,9 @@ mpl.pyplot.ion()
 
 menus= option_menu(menu_title="Select a page.",options=["Sample","Compose"],default_index=0,orientation=HORIZONTAL)
 
+
 def generate ():
+    global uploaded_file
     uploaded_file = st.file_uploader(label="Upload your CSV file", type=['csv', 'xlsx'])
 
 
@@ -34,60 +38,39 @@ def generate ():
             df = pd.read_csv(uploaded_file)
         except Exception as e:
             df = pd.read_excel(uploaded_file)
-            st.write("Please upload a valid CSV file.")
+
 
     try:
-       
-        
-        time= df['time'].tolist()
-        amplitude = df['amplitude'].tolist()
-        fig, ax = plt.subplots()
-        ax.plot(time, amplitude,color='b')
+        interactive_plot(df)
 
-        ax.grid(True, linestyle='-.')
-        ax.tick_params(labelcolor='r', labelsize='medium', width=3)
-        ax.set_title(uploaded_file.name)
-        
-        plt.xlim(9, 10.2)
-        plt.ylim(-1, 1.5)
-        plt.xlabel('Time')
-        plt.ylabel('Amplitude')
-        plt.style.use('dark_background')
-        # ax.xaxis.zoom(3)
-        
-        with plt.ion():
-        # interactive mode will be on
-        # figures will automatically be shown
-         fig2 = plt.figure()
-
-        plt.show()
-        st.write(fig)
-
-
-
-      
-       
-        # # plt.subplot(211)
-    
-        
-        # # plt.legend(fontsize=10, loc='upper right')
-        
-        
-        # plt.style.use('dark_background')
-
-
-        
-        # plt.plot(time, amplitude)
-        
-        
-        
-    #comment
-        
     except Exception as e:
-        st.write("Please upload the signal.")
+        st.write("You haven't uploaded a signal yet")  
+            
+
+           
+
+
+        
+  
+  
+def interactive_plot(dataframe):
     
+      time= df['time'].tolist()
+      amplitude = df['amplitude'].tolist()
+      col = st.color_picker('Select a plot color')
+    
+      plot = px.line(dataframe,x=time,y=amplitude,width=800,height=600,title=uploaded_file.name,range_x=[9, 10.2],range_y=[-1,1.5], template="plotly_dark")
+      plot.update_traces(line=dict(color=col))
+    
+      plot.update_xaxes(title_text='Time')
+      plot.update_yaxes(title_text='amplitude')
+     
+     
+      st.plotly_chart(plot)
+     
 
 
 
 if menus=="Sample":
-    generate()
+    generate(),
+    
