@@ -72,6 +72,16 @@ noise_watts=10**(noise_db/10)
 mean_noise=0
 noise=np.random.normal(mean_noise,np.sqrt(noise_watts),len(sine))
 noise_signal=sine+noise
+
+#adding two waves 
+adding_waves_checkbox=st.sidebar.checkbox("adding waves", value=False)
+if(adding_waves_checkbox):
+    frequency1 = st.sidebar.slider('frequency for wave 1',1, 10, 1, 1)  # freq (Hz)
+    amplitude1=st.sidebar.slider('amplitude for wave 1',1,10,1,1)
+    frequency2 = st.sidebar.slider('frequency for wave 2',1, 10, 1, 1)  # freq (Hz)
+    amplitude2=st.sidebar.slider('amplitude for wave 2',1,10,1,1)
+    final_added_wave=amplitude1 * np.sin(2 * np.pi * frequency1* time)+ amplitude2 * np.sin(2 * np.pi * frequency2* time)
+
 # Finding amplitude at each time
 #sampling variables
 if (sampling_checkbox):
@@ -116,13 +126,13 @@ else:
         plt.plot(time, sine,label='signal')
 plt.legend(fontsize=20, loc='upper right')
 
-
+if(adding_waves_checkbox):
+    plt.plot(time, final_added_wave,label='added signals')
 
 if(sampling_checkbox):
     plt.subplot(212)
     plt.xlabel('Time'+ r'$\rightarrow$')
-
-# Setting y axis label for the plot
+ #Setting y axis label for the plot
     plt.ylabel('Sin(time) '+ r'$\rightarrow$')
         # Showing grid
     plt.grid()
