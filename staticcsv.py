@@ -2,6 +2,7 @@ from distutils.command.upload import upload
 from email.policy import default
 from matplotlib.axis import XAxis,Axis
 from matplotlib.patches import Polygon
+from pyparsing import line
 import streamlit as st 
 from streamlit_option_menu import option_menu
 import matplotlib.pyplot as plt 
@@ -59,8 +60,8 @@ def interactive_plot(dataframe):
       col = st.color_picker('Select a plot color')
     
       plot = px.line(dataframe,x=time,y=amplitude,width=800,height=600,title=uploaded_file.name,range_x=[9, 10.2],range_y=[-1,1.5], template="plotly_dark")
-      plot.update_traces(marker=dict(color=col))
-
+      plot.update_traces(line=dict(color=col))
+    
       plot.update_xaxes(title_text='Time')
       plot.update_yaxes(title_text='amplitude')
      
