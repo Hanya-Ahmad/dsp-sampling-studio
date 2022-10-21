@@ -98,13 +98,27 @@ if (sampling_checkbox):
     T=1/samp_freq 
     n=np.arange(0,3/T)
     nT=n*T
+    nT_array=np.array(nT)
     if(noise_checkbox):
         sine_with_noise=amplitude* np.sin(2 * np.pi * frequency * nT)
         noise=np.random.normal(mean_noise,np.sqrt(noise_watts),len(sine_with_noise))
         sampled_amplitude=noise+sine_with_noise
+        sampled_amplitude_array=np.array(sampled_amplitude)
+
     else:
         sampled_amplitude=amplitude*np.sin(2 * np.pi * frequency * nT )
+        sampled_amplitude_array=np.array(sampled_amplitude)
 
+   
+
+def sinc_interp(nt_array, sampled_amplitude , time):
+    # if len(nt_array) != len(sampled_amplitude):
+    #     raise Exception('x and s must be the same length')
+    T = (sampled_amplitude[1] - sampled_amplitude[0])
+    sincM = np.tile(time, (len(sampled_amplitude), 1)) - np.tile(sampled_amplitude[:, np.newaxis], (1, len(time)))
+    yNew = np.dot(nt_array, np.sinc(sincM/T))
+    plt.subplot(212)
+    plt.plot(time,yNew,'r-')
 
 #helper function
 def cm_to_inch(value):
@@ -130,14 +144,16 @@ plt.legend(fontsize=20, loc='upper right')
 
 #execute sampling function if sampling checkbox is true
 if(sampling_checkbox):
-    plt.subplot(212)
+    
+    sinc_interp(nT_array, sampled_amplitude , time)
     plt.xlabel('Time'+ r'$\rightarrow$')
-    plt.ylabel('Sin(time) '+ r'$\rightarrow$')
+ #Setting y axis label for the plot
+    plt.ylabel('sampled wave'+ r'$\rightarrow$')
+        # Showing grid
     plt.grid()
     plt.axhline(y=0, color='k')
     plt.axvline(x=0, color='k')
-    plt.plot(nT,sampled_amplitude,'r*',label='sampled points')
-    plt.plot(nT,sampled_amplitude,label='reconstructed wave')
+    # plt.plot(nT,sampled_amplitude,'g-', label='reconstructed wave')
     plt.legend(fontsize=20, loc='upper right')
 
 #execute adding wave function if adding wave checkbox is true 
