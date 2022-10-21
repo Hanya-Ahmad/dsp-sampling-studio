@@ -44,6 +44,7 @@ noise_signal=sine+noise
 
 #show fs slider when sampling checkbox is true
 if(sampling_checkbox):
+    reconstruct_checkbox=st.sidebar.checkbox("reconstruct Sampling Signal", value=False)
     samp_freq=st.sidebar.slider("Sampling Frequency",min_value=1,max_value=100,value=20)
 
 #if session state has no 'added signals' object then create one 
@@ -144,16 +145,22 @@ plt.legend(fontsize=20, loc='upper right')
 
 #execute sampling function if sampling checkbox is true
 if(sampling_checkbox):
-    
-    sinc_interp(nT_array, sampled_amplitude , time)
+    if reconstruct_checkbox:
+        sinc_interp( sampled_amplitude,nT_array , time)
+    plt.subplot(212)
     plt.xlabel('Time'+ r'$\rightarrow$')
  #Setting y axis label for the plot
-    plt.ylabel('sampled wave'+ r'$\rightarrow$')
+    plt.ylabel('Sin(time) '+ r'$\rightarrow$')
         # Showing grid
     plt.grid()
+
+    # Highlighting axis at x=0 and y=0
     plt.axhline(y=0, color='k')
     plt.axvline(x=0, color='k')
-    # plt.plot(nT,sampled_amplitude,'g-', label='reconstructed wave')
+    plt.stem(nT,sampled_amplitude,'b',label='sampled points',linefmt='b')
+    # if reconstruct_checkbox:
+    #      plt.plot(nT,wsinterp(),'k',label='reconstructed wave')
+    # plt.plot(nT,sampled_amplitude,label='reconstructed wave')
     plt.legend(fontsize=20, loc='upper right')
 
 #execute adding wave function if adding wave checkbox is true 
