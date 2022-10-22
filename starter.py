@@ -29,6 +29,12 @@ fig_html = mpld3.fig_to_html(fig)
 plt.tight_layout()
 components.html(fig_html, height=600)
 
+checked=st.sidebar.checkbox("Add noise",value=False)
+sampling_checkbox=st.sidebar.checkbox("sampling",value=False) 
+
+snr_db=0
+if checked:
+     snr_db=st.sidebar.number_input("SNR level",value=0,min_value=0,max_value=150,step=5)
 
 # checked=st.sidebar.checkbox("Add noise",value=False) 
 # snr_db=0
@@ -56,7 +62,48 @@ components.html(fig_html, height=600)
 # plt.legend(fontsize=10, loc='upper right')
 # fig_html = mpld3.fig_to_html(fig)
 
-# plt.tight_layout()
+plt.tight_layout()
+def sampling(dataframe):
+        frequency=1
+        period=1/frequency
+        no_cycles=10/period
+        freq_sampling=2*frequency
+        no_points=dataframe.shape[0]
+        points_per_cycle=no_points/no_cycles
+        step=points_per_cycle/freq_sampling
+        sampling_time=[]
+        sampling_amplitude=[]
+        for i in range(int(step/2), int(no_points), int(step)):
+          sampling_time.append(dataframe.iloc[i, 0])
+          sampling_amplitude.append(dataframe.iloc[i, 1])
+        sampling_points=pd.DataFrame(
+            {"time": sampling_time, "amplitude": sampling_amplitude})
+        sampling=px.scatter(
+            sampling_points, x=sampling_points.columns[0], y=sampling_points.columns[1], title="sampling")
+        sampling.update_traces( marker=dict(size=12, line=dict(width=2, color= 'DarkSlateGrey')),
+                                                            selector=dict(mode='markers'))
+        st.plotly_chart(sampling, use_container_width=True)
+        return sampling_points
+if(sampling_checkbox):
+        sampling(df)
+
+def sinc_interpolation(signal, sample):
+    time=signal.iloc[:, 0]
+    sampled_amplitude= sample.iloc[:, 1]
+    sampled_time= sample.iloc[:, 0]
+    T=(sampled_time[1]-sampled_time[0])
+    sincM=np.tile(time, (len(sampled_time), 1))-np.tile(sampled_time[:,np.newaxis],(1, len(time)))
+    yNew=np.dot(sampled_amplitude, np.sinc(sincM/T))
+    fig, ax= plt.subplots()
+    ax.plot(time, yNew, label="Reconstructed signal")
+    ax.scatter(sampled_time, sampled_amplitude, color='r', label="sampling points", marker='x')
+    fig.legend()
+    plt.grid(True)
+    plt.title("Reconstructed signal")
+    st.pyplot(fig)
+
+
+    
 
 # components.html(fig_html, height=600)
  

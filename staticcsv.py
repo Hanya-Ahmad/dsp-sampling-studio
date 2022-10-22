@@ -1,5 +1,6 @@
 from distutils.command.upload import upload
 from email.policy import default
+from time import time
 from matplotlib.axis import XAxis,Axis
 from matplotlib.patches import Polygon
 from pyparsing import line
@@ -20,6 +21,7 @@ import mpld3
 from matplotlib.animation import FuncAnimation
 from tkinter import HORIZONTAL, Menu
 from turtle import color, width
+import plotly
 mpl.pyplot.ion()
 
 
@@ -43,9 +45,14 @@ def generate ():
 
     global df
     global noise_checkbox
+    global sampling_checkbox
+    global reconstruction_checkbox
+
+
     if uploaded_file is not None:
         noise_checkbox=st.checkbox("Add noise",value=False)
-        
+        sampling_checkbox=st.checkbox("sampling",value=False)
+        reconstruction_checkbox==st.checkbox("reconstruction",value=False)
         try:
             df = pd.read_csv(uploaded_file)
             
@@ -63,11 +70,6 @@ def generate ():
         print(e)
             
 
-           
-
-
-        
-  
   
 def interactive_plot(dataframe):
     snr_db=0
@@ -75,6 +77,7 @@ def interactive_plot(dataframe):
         snr_db=st.number_input("SNR level",value=0,min_value=0,max_value=120,step=5)
     time=df['time'].tolist()
     amplitude = df['amplitude'].tolist()
+    time = df['time'].tolist()
     col = st.color_picker('Select a plot color','#0827F5')
     mean=df['amplitude'].mean()
     std_deviation=df['amplitude'].std()
@@ -95,9 +98,53 @@ def interactive_plot(dataframe):
     plot.update_traces(line=dict(color=col))
     plot.update_xaxes(title_text='Time')
     plot.update_yaxes(title_text='amplitude')
-     
+    def sampling(dataframe):
+        frequency=1
+        period=1/frequency
+        no_cycles=10/period
+        freq_sampling=2*frequency
+        no_points=dataframe.shape[0]
+        points_per_cycle=no_points/no_cycles
+        step=points_per_cycle/freq_sampling
+        sampling_time=[]
+        sampling_amplitude=[]
+        for i in range(int(step/2), int(no_points), int(step)):
+          sampling_time.append(dataframe.iloc[i, 0])
+          sampling_amplitude.append(dataframe.iloc[i, 1])
+        sampling_points=pd.DataFrame({"time": sampling_time, "amplitude": sampling_amplitude})
+        sampling=px.scatter(sampling_points, x=sampling_points.columns[0], y=sampling_points.columns[1], title="sampling")
+        sampling.update_traces( marker=dict(size=12, line=dict(width=2, color= 'DarkSlateGrey')),
+                                                            selector=dict(mode='markers'))
+        st.plotly_chart(sampling, use_container_width=True)
+        global sample
+        sample=  pd.DataFrame(sampling_time, sampling_amplitude,  columns=['time', 'amplitude'])
+        return sampling_points
+
+    if(sampling_checkbox):
+        sampling(df)
+
+    def sinc_interpolation(signal, sample):
+      time = signal.iloc[:, 0]
+      sampled_amplitude= sample.iloc[:, 1]
+      sampled_time= sample.iloc[:, 0]
+      T=(sampled_time[1]-sampled_time[0])
+      sincM=np.tile(time, (len(sampled_time), 1))-np.tile(sampled_time[:,np.newaxis],(1, len(time)))
+      yNew=np.dot(sampled_amplitude, np.sinc(sincM/T))
+      fig, ax= plt.subplots()
+      ax.plot(time, yNew, label="Reconstructed signal")
+      ax.scatter(sampled_time, sampled_amplitude, color='r', label="sampling points", marker='x')
+      fig.legend()
+      plt.grid(True)
+      plt.title("Reconstructed signal")
+      st.pyplot(fig)
+
+    if(reconstruction_checkbox):
+        sinc_interpolation(df,sample)
      
     st.plotly_chart(plot)
+
+
+
      
 
 
