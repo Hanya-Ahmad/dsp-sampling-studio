@@ -1,6 +1,5 @@
 from ctypes.wintypes import PLARGE_INTEGER
 import itertools
-import time as tm
 from itertools import count
 from signal import signal
 
@@ -37,7 +36,7 @@ snr_db=0
 noise_checkbox=st.sidebar.checkbox("Add noise",value=False) 
 #show snr slider when noise checkbox is true
 if noise_checkbox:
-     snr_db=st.sidebar.number_input("SNR level",value=0,min_value=0,max_value=120,step=5)
+     snr_db=st.sidebar.number_input("SNR level",value=20,min_value=0,max_value=120,step=5)
      components.html(
     """
     <script>
@@ -133,7 +132,8 @@ def sinc_interp(nt_array, sampled_amplitude , time):
     T = (sampled_amplitude[1] - sampled_amplitude[0])
     sincM = np.tile(time, (len(sampled_amplitude), 1)) - np.tile(sampled_amplitude[:, np.newaxis], (1, len(time)))
     yNew = np.dot(nt_array, np.sinc(sincM/T))
-    plt.subplot(212)
+    plt.subplot(3,1,2)
+    plt.title("Sampled Wave")
     plt.xticks(fontsize=20)
     plt.yticks(fontsize=20)
     plt.plot(time,yNew,'r-',label='Reconstructed wave')
@@ -146,7 +146,8 @@ def cm_to_inch(value):
 fig=plt.figure(figsize=(cm_to_inch(60),cm_to_inch(45)))
 
 #set plot parameters
-plt.subplot(211)
+plt.subplot(3,1,1)
+plt.title("Sine Wave(s)")
 plt.xlabel('Time'+ r'$\rightarrow$',fontsize=20)
 plt.ylabel('Sin(time) '+ r'$\rightarrow$',fontsize=20)
 plt.grid()
@@ -172,7 +173,8 @@ if(sampling_checkbox):
     signal_label="sampled points"
     if reconstruct_checkbox:
         sinc_interp( sampled_amplitude,nT_array , time)
-    plt.subplot(212)
+    plt.subplot(3,1,2)
+    plt.title("Sampled Wave")
     plt.xlabel('Time'+ r'$\rightarrow$',fontsize=20)
  #Setting y axis label for the plot
     plt.ylabel('Sin(time) '+ r'$\rightarrow$',fontsize=20)
@@ -188,41 +190,39 @@ if(sampling_checkbox):
 
 #execute adding wave function if adding wave checkbox is true 
 if(adding_waves_checkbox):
+
     added_frequency = st.sidebar.slider('frequency for added wave',1, 10, 1, 1)  # freq (Hz)
     added_amplitude=st.sidebar.slider('amplitude for added wave',1,10,1,1)
     added_sine=added_amplitude*np.sin(2*np.pi*added_frequency*time)
     added_label=st.sidebar.text_input(label="enter signal name", max_chars=50)
     add_wave_button=st.sidebar.button("Add Wave")
-
+    
     #call the add_signal function when button is clicked
     if(add_wave_button):
         add_signal(added_label,time,added_sine)
 
-st.write("len:",len(st.session_state.added_signals))
-if(len(st.session_state.added_signals)>1):
-    for signal in st.session_state.added_signals:
-        plt.subplot(211)
-        plt.plot(signal['x'], signal['y'],
-                label=signal['name'])
-        plt.legend(fontsize=16)
+
 sum_amplitude=[]
-st.write(st.session_state.added_signals)
+
 #loop over each item in added_signals and plot them all on the same plot   
 added_signals_list=st.session_state.added_signals
-''' for index in range(len(st.session_state.added_signals)):
-    for key,value in (st.session_state.added_signals[index]):
-        print(key)
-        y_total=st.session_state.added_signals['y'][index][key]+st.session_state.added_signals['y'][index][key]
-        sum_amplitude.append(y_total)
- '''
+remove_options=[]
 if(adding_waves_checkbox):
-    y0=(added_signals_list[0])['y']
-    for i in range(len(y0)):
-        sum=0
-        for dict in added_signals_list:
-            sum+=dict['y'][i]
-        sum_amplitude.append(sum)
-    plt.subplot(212)
+    for dict in added_signals_list:
+        remove_options.append(dict['name'])
+    if(sampling_checkbox):
+        plt.subplot(3,1,3)
+    else:
+        plt.subplot(3,1,2)
+    plt.title("Resulting Signal")
+    
+    st.write(remove_options)
+    print(remove_options)
+    if(len(st.session_state.added_signals)>1):
+        remove_wave_selectbox=st.sidebar.selectbox('Remove Wave',remove_options)
+        remove_wave_button=st.sidebar.button('Remove')
+        if(remove_wave_button):
+            remove_signal(remove_wave_selectbox)
     plt.xlabel('Time'+ r'$\rightarrow$',fontsize=20)
     plt.ylabel('Sin(time) '+ r'$\rightarrow$',fontsize=20)
     plt.grid()
@@ -230,6 +230,23 @@ if(adding_waves_checkbox):
     plt.yticks(fontsize=20)
     plt.axhline(y=0, color='k')
     plt.axvline(x=0, color='k')
-    plt.plot(time,sum_amplitude,label="total")
+    y0=(added_signals_list[0])['y']
+    for index in range(len(y0)):
+        sum=0
+        for dict in added_signals_list:
+            sum+=dict['y'][index]
+        sum_amplitude.append(sum)
 
+    plt.plot(time,sum_amplitude,label="total")
+    st.write("list of names", )
+if(len(st.session_state.added_signals)>1):
+    for i in range (1,len(st.session_state.added_signals)):
+        plt.subplot(3,1,1)
+        plt.plot(st.session_state.added_signals[i]['x'], st.session_state.added_signals[i]['y'],
+        label=st.session_state.added_signals[i]['name'])
+        plt.legend(fontsize=16)
+else:
+    plt.subplot(3,1,2)
+    plt.close()
+st.write(st.session_state.added_signals)
 st.pyplot(fig)
