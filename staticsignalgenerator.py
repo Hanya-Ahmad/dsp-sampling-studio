@@ -54,11 +54,13 @@ if 'added_signals' not in st.session_state:
     
     #if noise checkbox is true then plot the main signal with noise
     if(noise_checkbox):
-        st.session_state.added_signals = [{'name':'main','x':time,'y':noise_signal}]
+        signal_label="signal with noise"
+        st.session_state.added_signals = [{'name':signal_label,'x':time,'y':noise_signal}]
 
     #else plot the main signal without noise
     else:
-      st.session_state.added_signals = [{'name':'main','x':time,'y':sine}] 
+        signal_label="signal"
+        st.session_state.added_signals = [{'name':signal_label,'x':time,'y':sine}] 
 
 
 st.markdown("""
@@ -131,16 +133,20 @@ plt.axhline(y=0, color='k')
 plt.axvline(x=0, color='k')
 
 # if noise checkbox is clicked plot noise signal against time
+signal_label=""
 if (noise_checkbox):
-    plt.plot(time, noise_signal,label='signal with noise')
+    signal_label="signal with noise"
+    plt.plot(time, noise_signal,label=signal_label)
     plt.legend(fontsize=20, loc='upper right')
 
-# else:
-#         plt.plot(time, sine,label='signal')
-#         plt.legend(fontsize=20, loc='upper right')
+else:
+    signal_label="signal"
+    plt.plot(time, sine,label=signal_label)
+    plt.legend(fontsize=20, loc='upper right')
 
 #execute sampling function if sampling checkbox is true
 if(sampling_checkbox):
+    signal_label="sampled points"
     if reconstruct_checkbox:
         sinc_interp( sampled_amplitude,nT_array , time)
     plt.subplot(212)
@@ -154,7 +160,7 @@ if(sampling_checkbox):
     # Highlighting axis at x=0 and y=0
     plt.axhline(y=0, color='k')
     plt.axvline(x=0, color='k')
-    plt.stem(nT,sampled_amplitude,'b',label='sampled points',linefmt='b',basefmt=" ")
+    plt.stem(nT,sampled_amplitude,'b',label=signal_label,linefmt='b',basefmt=" ")
     plt.legend(fontsize=16, loc='upper right')
 
 #execute adding wave function if adding wave checkbox is true 
@@ -162,21 +168,45 @@ if(adding_waves_checkbox):
     added_frequency = st.sidebar.slider('frequency for added wave',1, 10, 1, 1)  # freq (Hz)
     added_amplitude=st.sidebar.slider('amplitude for added wave',1,10,1,1)
     added_sine=added_amplitude*np.sin(2*np.pi*added_frequency*time)
-    added_label=str(np.random.normal(0,100))
+    added_label=st.sidebar.text_input(label="enter signal name", max_chars=50)
     add_wave_button=st.sidebar.button("Add Wave")
 
     #call the add_signal function when button is clicked
     if(add_wave_button):
         add_signal(added_label,time,added_sine)
 
+st.write("len:",len(st.session_state.added_signals))
+if(len(st.session_state.added_signals)>1):
+    for signal in st.session_state.added_signals:
+        plt.subplot(211)
+        plt.plot(signal['x'], signal['y'],
+                label=signal['name'])
+        plt.legend(fontsize=16)
+sum_amplitude=[]
+st.write(st.session_state.added_signals)
 #loop over each item in added_signals and plot them all on the same plot   
-for signal in st.session_state.added_signals:
-    plt.subplot(211)
-    plt.plot(signal['x'], signal['y'],
-            label=signal['name'])
-    plt.legend(fontsize=16)
-   
-
-
+added_signals_list=st.session_state.added_signals
+''' for index in range(len(st.session_state.added_signals)):
+    for key,value in (st.session_state.added_signals[index]):
+        print(key)
+        y_total=st.session_state.added_signals['y'][index][key]+st.session_state.added_signals['y'][index][key]
+        sum_amplitude.append(y_total)
+ '''
+if(adding_waves_checkbox):
+    y0=(added_signals_list[0])['y']
+    for i in range(len(y0)):
+        sum=0
+        for dict in added_signals_list:
+            sum+=dict['y'][i]
+        sum_amplitude.append(sum)
+    plt.subplot(212)
+    plt.xlabel('Time'+ r'$\rightarrow$',fontsize=20)
+    plt.ylabel('Sin(time) '+ r'$\rightarrow$',fontsize=20)
+    plt.grid()
+    plt.xticks(fontsize=20)
+    plt.yticks(fontsize=20)
+    plt.axhline(y=0, color='k')
+    plt.axvline(x=0, color='k')
+    plt.plot(time,sum_amplitude,label="total")
 
 st.pyplot(fig)
