@@ -73,6 +73,7 @@ def interactive_plot(dataframe):
     snr_db=0
     if(noise_checkbox):
         snr_db=st.number_input("SNR level",value=0,min_value=0,max_value=120,step=5)
+    time=df['time'].tolist()
     amplitude = df['amplitude'].tolist()
     col = st.color_picker('Select a plot color','#0827F5')
     mean=df['amplitude'].mean()
