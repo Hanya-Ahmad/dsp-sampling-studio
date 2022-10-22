@@ -10,15 +10,25 @@ import numpy as np
 import pandas as pd
 import plotly.express as px
 import plotly.figure_factory as ff
-from matplotlib.animation import FuncAnimation
-
 import streamlit as st
 import streamlit.components.v1 as components
+
 
 st.title("Sampling Studio")
 st.sidebar.title("Options")
 
 #wave variables
+st.markdown(
+    """
+<style>
+.sidebar .sidebar-content {
+    background-image: linear-gradient(#2e7bcf,#2e7bcf);
+    color: ""#FF4B4B";
+}
+</style>
+""",
+    unsafe_allow_html=True,
+)
 frequency = st.sidebar.slider('frequency',1, 10, 1, 1)  # freq (Hz)
 amplitude=st.sidebar.slider('amplitude',1,10,1,1)
 time= np.linspace(0, 3, 1200) #time steps
@@ -28,6 +38,19 @@ noise_checkbox=st.sidebar.checkbox("Add noise",value=False)
 #show snr slider when noise checkbox is true
 if noise_checkbox:
      snr_db=st.sidebar.number_input("SNR level",value=0,min_value=0,max_value=120,step=5)
+     components.html(
+    """
+    <script>
+    const elements = window.parent.document.querySelectorAll('.stNumberInput div[data-baseweb="input"] > div')
+    console.log(elements)
+    elements[0].style.backgroundColor ="#F64848"
+    </script>
+    """,
+        height=0,
+        width=0,
+    )
+
+     
 sampling_checkbox=st.sidebar.checkbox("Sampling", value=False)
 
 
