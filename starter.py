@@ -31,6 +31,7 @@ components.html(fig_html, height=600)
 
 checked=st.sidebar.checkbox("Add noise",value=False)
 sampling_checkbox=st.sidebar.checkbox("sampling",value=False) 
+reconstruction_checkbox=st.sidebar.checkbox("reconstruction",value=False)
 
 snr_db=0
 if checked:
@@ -71,6 +72,7 @@ def sampling(dataframe):
         for i in range(int(step/2), int(no_points), int(step)):
           sampling_time.append(dataframe.iloc[i, 0])
           sampling_amplitude.append(dataframe.iloc[i, 1])
+        global sampling_points
         sampling_points=pd.DataFrame(
             {"time": sampling_time, "amplitude": sampling_amplitude})
         sampling=px.scatter(
@@ -96,7 +98,8 @@ def sinc_interpolation(signal, sample):
     plt.grid(True)
     plt.title("Reconstructed signal")
     st.pyplot(fig)
-
+if(reconstruction_checkbox):
+        sinc_interpolation(df,sampling_points)
 
     
 
