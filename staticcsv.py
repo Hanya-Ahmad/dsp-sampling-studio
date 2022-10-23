@@ -52,7 +52,7 @@ def generate ():
     if uploaded_file is not None:
         noise_checkbox=st.checkbox("Add noise",value=False)
         sampling_checkbox=st.checkbox("sampling",value=False)
-        reconstruction_checkbox==st.checkbox("reconstruction",value=False)
+        reconstruction_checkbox=st.checkbox("reconstruction",value=False)
         try:
             df = pd.read_csv(uploaded_file)
             
@@ -75,7 +75,6 @@ def interactive_plot(dataframe):
     snr_db=0
     if(noise_checkbox):
         snr_db=st.number_input("SNR level",value=0,min_value=0,max_value=120,step=5)
-    time=df['time'].tolist()
     amplitude = df['amplitude'].tolist()
     time = df['time'].tolist()
     col = st.color_picker('Select a plot color','#0827F5')
@@ -111,13 +110,12 @@ def interactive_plot(dataframe):
         for i in range(int(step/2), int(no_points), int(step)):
           sampling_time.append(dataframe.iloc[i, 0])
           sampling_amplitude.append(dataframe.iloc[i, 1])
+        global sampling_points
         sampling_points=pd.DataFrame({"time": sampling_time, "amplitude": sampling_amplitude})
         sampling=px.scatter(sampling_points, x=sampling_points.columns[0], y=sampling_points.columns[1], title="sampling")
         sampling.update_traces( marker=dict(size=12, line=dict(width=2, color= 'DarkSlateGrey')),
                                                             selector=dict(mode='markers'))
         st.plotly_chart(sampling, use_container_width=True)
-        global sample
-        sample=  pd.DataFrame(sampling_time, sampling_amplitude,  columns=['time', 'amplitude'])
         return sampling_points
 
     if(sampling_checkbox):
@@ -139,7 +137,7 @@ def interactive_plot(dataframe):
       st.pyplot(fig)
 
     if(reconstruction_checkbox):
-        sinc_interpolation(df,sample)
+        sinc_interpolation(df,sampling_points)
      
     st.plotly_chart(plot)
 
