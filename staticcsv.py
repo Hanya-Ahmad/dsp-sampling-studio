@@ -97,6 +97,7 @@ def interactive_plot(dataframe):
     plot.update_traces(line=dict(color=col))
     plot.update_xaxes(title_text='Time')
     plot.update_yaxes(title_text='amplitude')
+    
     def sampling(dataframe):
         frequency=1
         period=1/frequency
@@ -141,10 +142,14 @@ def interactive_plot(dataframe):
      
     st.plotly_chart(plot)
 
+def generate_2():
+   print("anything")
+   #hamada hamada
 
 
      
-
+if menus=="compose":
+    generate_2()
 
 
 if menus=="Sample":
