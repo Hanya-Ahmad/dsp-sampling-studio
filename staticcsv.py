@@ -101,7 +101,7 @@ def interactive_plot(dataframe):
     def sampling(dataframe):
         frequency=1
         period=1/frequency
-        no_cycles=10/period
+        no_cycles=dataframe.iloc[:,0].max()/period
         freq_sampling=2*frequency
         no_points=dataframe.shape[0]
         points_per_cycle=no_points/no_cycles
