@@ -23,6 +23,12 @@ from tkinter import HORIZONTAL, Menu
 from turtle import color, width
 import plotly
 mpl.pyplot.ion()
+from PIL import Image
+import streamlit.components.v1 as components
+from ctypes.wintypes import PLARGE_INTEGER
+import itertools
+from itertools import count
+from signal import signal
 
 
 
@@ -34,10 +40,27 @@ st.set_page_config(
     
 )
 
-st.title("Sampling Sudio Web App.")
 
-menus= option_menu(menu_title="Select a page.",options=["Sample","Compose"],default_index=0,orientation=HORIZONTAL)
- 
+
+with open("design.css") as source_des:
+    st.markdown(f"<style>{source_des.read()}</style>",unsafe_allow_html=True)
+st.markdown("<h1 style='text-align: center;'>SAMPLING STUDIO WEB APP.</h1>", unsafe_allow_html=True)
+
+
+
+menus= option_menu(menu_title="Select a page.",options=["Sample","Compose"],default_index=0,orientation=HORIZONTAL,
+styles={
+    "container": {"padding": "0!important"},
+    "nav-link-selected": {"background-color": "black", "padding":"10px", "margin":"10px"},
+    "nav-link": {
+        "font-size": "20px",
+        "text-align": "center",
+        "--hover-color": "white",
+        "margin": "15px"
+    }
+}
+) 
+
 
 def generate ():
     global uploaded_file
@@ -148,7 +171,7 @@ def interactive_plot(dataframe):
 
 def generate_2():
     
-    st.title("Sampling Studio")
+  
     st.sidebar.title("Options")
 
     #wave variables
@@ -165,6 +188,28 @@ def generate_2():
     )
     frequency = st.sidebar.slider('frequency',1, 10, 1, 1)  # freq (Hz)
     amplitude=st.sidebar.slider('amplitude',1,10,1,1)
+    
+    ColorMinMax = st.markdown(''' <style> div.stSlider > div[data-baseweb = "slider"] > div[data-testid="stTickBar"] > div {
+        background: rgb(1 1 1 / 0%); } </style>''', unsafe_allow_html = True)
+
+
+    Slider_Cursor = st.markdown(''' <style> div.stSlider > div[data-baseweb="slider"] > div > div > div[role="slider"]{
+        background-color: rgb(14, 38, 74); box-shadow: rgb(14 38 74 / 20%) 0px 0px 0px 0.2rem;} </style>''', unsafe_allow_html = True)
+
+    
+    Slider_Number = st.markdown(''' <style> div.stSlider > div[data-baseweb="slider"] > div > div > div > div
+                                    { color: rgb(14, 38, 74); } </style>''', unsafe_allow_html = True)
+    
+
+    col = f''' <style> div.stSlider > div[data-baseweb = "slider"] > div > div {{
+        background: linear-gradient(to right, rgb(1, 183, 158) 0%, 
+                                    rgb(31, 119, 180) {frequency and amplitude}%, 
+                                    rgba(31, 119, 180) {frequency and amplitude}%, 
+                                    rgba(31, 119, 180) 100%); }} </style>'''
+
+    ColorSlider = st.markdown(col, unsafe_allow_html = True)
+
+
     time= np.linspace(0, 3, 1200) #time steps
     sine = amplitude * np.sin(2 * np.pi * frequency* time) # sine wave 
     snr_db=0
