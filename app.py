@@ -23,12 +23,6 @@ from tkinter import HORIZONTAL, Menu
 from turtle import color, width
 import plotly
 mpl.pyplot.ion()
-from PIL import Image
-import streamlit.components.v1 as components
-from ctypes.wintypes import PLARGE_INTEGER
-import itertools
-from itertools import count
-from signal import signal
 
 
 
@@ -40,27 +34,10 @@ st.set_page_config(
     
 )
 
+st.title("Sampling Sudio Web App.")
 
-
-# with open("design.css") as source_des:
-#     st.markdown(f"<style>{source_des.read()}</style>",unsafe_allow_html=True)
-# st.markdown("<h1 style='text-align: center;'>SAMPLING STUDIO WEB APP.</h1>", unsafe_allow_html=True)
-
-
-
-menus= option_menu(menu_title="Select a page.",options=["Sample","Compose"],default_index=0,orientation=HORIZONTAL,
-styles={
-    "container": {"padding": "0!important"},
-    "nav-link-selected": {"background-color": "black", "padding":"10px", "margin":"10px"},
-    "nav-link": {
-        "font-size": "20px",
-        "text-align": "center",
-        "--hover-color": "white",
-        "margin": "15px"
-    }
-}
-) 
-
+menus= option_menu(menu_title="Select a page.",options=["Sample","Compose"],default_index=0,orientation=HORIZONTAL)
+ 
 
 def generate ():
     global uploaded_file
@@ -70,12 +47,11 @@ def generate ():
     global noise_checkbox
     global sampling_checkbox
     global reconstruction_checkbox
-    global sampling_freq
+
 
     if uploaded_file is not None:
         noise_checkbox=st.sidebar.checkbox("Add noise",value=False)
         sampling_checkbox=st.sidebar.checkbox("sampling",value=False)
-        sampling_freq=st.sidebar.slider(label="sampling freq",min_value=2,max_value=10,value=5)
         reconstruction_checkbox=st.sidebar.checkbox("reconstruction",value=False)
         try:
             df = pd.read_csv(uploaded_file)
@@ -115,15 +91,15 @@ def interactive_plot(dataframe):
     #resulting signal with noise
     noise_signal=df['amplitude']+noise
     if(noise_checkbox):
-        plot = px.line(dataframe,x=time,y=noise_signal,width=800,height=600,title=uploaded_file.name,range_x=[0,1],range_y=[-1,1], template="plotly_dark")
+        plot = px.line(dataframe,x=time,y=noise_signal,width=800,height=600,title=uploaded_file.name,range_x=[9, 10.2],range_y=[-1,1.5], template="plotly_dark")
     else:
-        plot = px.line(dataframe,x=time,y=amplitude,width=800,height=600,title=uploaded_file.name,range_x=[0, 1],range_y=[-1,1], template="plotly_dark")
+        plot = px.line(dataframe,x=time,y=amplitude,width=800,height=600,title=uploaded_file.name,range_x=[9, 10.2],range_y=[-1,1.5], template="plotly_dark")
     plot.update_traces(line=dict(color=col))
     plot.update_xaxes(title_text='Time')
     plot.update_yaxes(title_text='amplitude')
     
     def sampling(dataframe):
-        frequency=sampling_freq
+        frequency=1
         period=1/frequency
         no_cycles=dataframe.iloc[:,0].max()/period
         freq_sampling=2*frequency
@@ -140,15 +116,10 @@ def interactive_plot(dataframe):
             sampling_points=pd.DataFrame({"time": sampling_time, "amplitude": noise_signal})
         else:
             sampling_points=pd.DataFrame({"time": sampling_time, "amplitude": sampling_amplitude})
-        sampling=px.scatter(sampling_points,width=800, range_x=[0, 1],range_y=[-1,1],x=sampling_points.columns[0], y=sampling_points.columns[1], title="sampling")
+        sampling=px.scatter(sampling_points, x=sampling_points.columns[0], y=sampling_points.columns[1], title="sampling")
         sampling.update_traces( marker=dict(size=12, line=dict(width=2, color= 'DarkSlateGrey')),
                                                             selector=dict(mode='markers'))
-        
-        if reconstruction_checkbox:
-            pass
-        else:
-            st.plotly_chart(sampling, use_container_width=True)
-
+        st.plotly_chart(sampling, use_container_width=True)
         return sampling_points
 
     if(sampling_checkbox):
@@ -162,18 +133,12 @@ def interactive_plot(dataframe):
       sincM=np.tile(time, (len(sampled_time), 1))-np.tile(sampled_time[:,np.newaxis],(1, len(time)))
       yNew=np.dot(sampled_amplitude, np.sinc(sincM/T))
       fig, ax= plt.subplots()
-      reconstruct=ax.plot(time, yNew,color='r' ,label="Reconstructed signal")
-      ax.stem(sampled_time, sampled_amplitude,'b',linefmt='b',basefmt="b",label="sampling points")
+      ax.plot(time, yNew, label="Reconstructed signal")
+      ax.scatter(sampled_time, sampled_amplitude, color='r', label="sampling points", marker='x')
       fig.legend()
       plt.grid(True)
-      plt.title("Reconstructed signal&Sampling",fontsize=10)
-      plt.xlabel("Time")
-      plt.ylabel("amplitude")
-      plt.xlim([0, 1])
-      plt.ylim([-1, 1])
-
+      plt.title("Reconstructed signal")
       st.pyplot(fig)
-      
 
     if(reconstruction_checkbox):
         sinc_interpolation(df,sampling_points)
@@ -183,7 +148,7 @@ def interactive_plot(dataframe):
 
 def generate_2():
     
-  
+    st.title("Sampling Studio")
     st.sidebar.title("Options")
 
     #wave variables
@@ -200,28 +165,6 @@ def generate_2():
     )
     frequency = st.sidebar.slider('frequency',1, 10, 1, 1)  # freq (Hz)
     amplitude=st.sidebar.slider('amplitude',1,10,1,1)
-    
-    ColorMinMax = st.markdown(''' <style> div.stSlider > div[data-baseweb = "slider"] > div[data-testid="stTickBar"] > div {
-        background: rgb(1 1 1 / 0%); } </style>''', unsafe_allow_html = True)
-
-
-    Slider_Cursor = st.markdown(''' <style> div.stSlider > div[data-baseweb="slider"] > div > div > div[role="slider"]{
-        background-color: rgb(14, 38, 74); box-shadow: rgb(14 38 74 / 20%) 0px 0px 0px 0.2rem;} </style>''', unsafe_allow_html = True)
-
-    
-    Slider_Number = st.markdown(''' <style> div.stSlider > div[data-baseweb="slider"] > div > div > div > div
-                                    { color: rgb(14, 38, 74); } </style>''', unsafe_allow_html = True)
-    
-
-    col = f''' <style> div.stSlider > div[data-baseweb = "slider"] > div > div {{
-        background: linear-gradient(to right, rgb(1, 183, 158) 0%, 
-                                    rgb(31, 119, 180) {frequency and amplitude}%, 
-                                    rgba(31, 119, 180) {frequency and amplitude}%, 
-                                    rgba(31, 119, 180) 100%); }} </style>'''
-
-    ColorSlider = st.markdown(col, unsafe_allow_html = True)
-
-
     time= np.linspace(0, 3, 1200) #time steps
     sine = amplitude * np.sin(2 * np.pi * frequency* time) # sine wave 
     snr_db=0
@@ -335,12 +278,12 @@ def generate_2():
         samp_frq=fsample
         time_range=(max(t)-min(t))
         samp_rate=int((len(t)/time_range)/((fsample)))
+        global samp_time, samp_amp
         samp_time=t[::samp_rate]
         samp_amp= sin[::samp_rate]
         return samp_time,samp_amp
 
     fsample = st.slider('Fs', 1,20)
-    sampleTime,sampleAmp = sampling(fsample, time, Functions.Current_amplitude)
     #helper function
     def cm_to_inch(value):
         return value/2.54
@@ -451,18 +394,19 @@ def generate_2():
     if(sampling_checkbox & adding_waves_checkbox):
         max_frequency=max(st.session_state.frequencies_list)
         added_samp_frequency=st.sidebar.slider("Sampling frequency for resulting signsl", min_value=0.5*max_frequency, max_value=float(5*max_frequency), step=0.5*max_frequency)
-        total_T=1/added_samp_frequency
-        total_n=np.arange(0,3/T)
-        total_nT=total_n*total_T
-        total_nT_array=np.array(total_nT)
-        st.write("max freq: ", max_frequency)
-        st.write("len(sum_amplitude)", len(sum_amplitude) )
-        st.write("len(total_nT)", len(total_nT )) 
-        signal_label="sampled points new"
-        total_sampled_amplitude=amplitude*np.sin(2 * np.pi * max_frequency * total_nT )
-        total_sampled_amplitude_array=np.array(total_sampled_amplitude)
+        sampling(added_samp_frequency, time, sum_amplitude)
+        # total_T=1/added_samp_frequency
+        # total_n=np.arange(0,3/T)
+        # total_nT=total_n*total_T
+        # total_nT_array=np.array(total_nT)
+        # st.write("max freq: ", max_frequency)
+        # st.write("len(sum_amplitude)", len(sum_amplitude) )
+        # st.write("len(total_nT)", len(total_nT )) 
+        # signal_label="sampled points new"
+        # total_sampled_amplitude=amplitude*np.sin(2 * np.pi * max_frequency * total_nT )
+        # total_sampled_amplitude_array=np.array(total_sampled_amplitude)
         if reconstruct_checkbox:
-            sinc_interp(total_sampled_amplitude,total_nT_array,time)
+            sinc_interp(samp_amp,samp_time,time)
         else:
             plt.subplot(4,1,3)
             
@@ -477,7 +421,7 @@ def generate_2():
         # Highlighting axis at x=0 and y=0
         plt.axhline(y=0, color='k')
         plt.axvline(x=0, color='k')
-        plt.stem(total_nT,total_sampled_amplitude,'b',label=signal_label,linefmt='b',basefmt=" ")
+        plt.stem(samp_time, samp_amp,'b',label=signal_label,linefmt='b',basefmt=" ")
         plt.legend(fontsize=16, loc='upper right')
             
     if(len(st.session_state.added_signals)>1):
