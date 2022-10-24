@@ -274,6 +274,16 @@ def generate_2():
         plt.yticks(fontsize=20)
         plt.plot(time,yNew,'r-',label='Reconstructed wave')
 
+    def sampling(fsample,t,sin):
+        samp_frq=fsample
+        time_range=(max(t)-min(t))
+        samp_rate=int((len(t)/time_range)/((fsample)))
+        samp_time=t[::samp_rate]
+        samp_amp= sin[::samp_rate]
+        return samp_time,samp_amp
+
+    fsample = st.slider('Fs', 1,20)
+    sampleTime,sampleAmp = sampling(fsample, time, Functions.Current_amplitude)
     #helper function
     def cm_to_inch(value):
         return value/2.54
