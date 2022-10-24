@@ -1,4 +1,4 @@
-ffrom distutils.command.upload import upload
+from distutils.command.upload import upload
 from email.policy import default
 from time import time
 from matplotlib.axis import XAxis,Axis
@@ -70,11 +70,12 @@ def generate ():
     global noise_checkbox
     global sampling_checkbox
     global reconstruction_checkbox
-
+    global sampling_freq
 
     if uploaded_file is not None:
         noise_checkbox=st.sidebar.checkbox("Add noise",value=False)
         sampling_checkbox=st.sidebar.checkbox("sampling",value=False)
+        sampling_freq=st.sidebar.slider(label="sampling freq",min_value=2,max_value=10,value=5)
         reconstruction_checkbox=st.sidebar.checkbox("reconstruction",value=False)
         try:
             df = pd.read_csv(uploaded_file)
@@ -114,15 +115,15 @@ def interactive_plot(dataframe):
     #resulting signal with noise
     noise_signal=df['amplitude']+noise
     if(noise_checkbox):
-        plot = px.line(dataframe,x=time,y=noise_signal,width=800,height=600,title=uploaded_file.name,range_x=[0,2],range_y=[-1,1], template="plotly_dark")
+        plot = px.line(dataframe,x=time,y=noise_signal,width=800,height=600,title=uploaded_file.name,range_x=[0,1],range_y=[-1,1], template="plotly_dark")
     else:
-        plot = px.line(dataframe,x=time,y=amplitude,width=800,height=600,title=uploaded_file.name,range_x=[0, 2],range_y=[-1,1], template="plotly_dark")
+        plot = px.line(dataframe,x=time,y=amplitude,width=800,height=600,title=uploaded_file.name,range_x=[0, 1],range_y=[-1,1], template="plotly_dark")
     plot.update_traces(line=dict(color=col))
     plot.update_xaxes(title_text='Time')
     plot.update_yaxes(title_text='amplitude')
     
     def sampling(dataframe):
-        frequency=2
+        frequency=sampling_freq
         period=1/frequency
         no_cycles=dataframe.iloc[:,0].max()/period
         freq_sampling=2*frequency
@@ -139,7 +140,7 @@ def interactive_plot(dataframe):
             sampling_points=pd.DataFrame({"time": sampling_time, "amplitude": noise_signal})
         else:
             sampling_points=pd.DataFrame({"time": sampling_time, "amplitude": sampling_amplitude})
-        sampling=px.scatter(sampling_points,width=800, range_x=[0, 2],range_y=[-1,1],x=sampling_points.columns[0], y=sampling_points.columns[1], title="sampling")
+        sampling=px.scatter(sampling_points,width=800, range_x=[0, 1],range_y=[-1,1],x=sampling_points.columns[0], y=sampling_points.columns[1], title="sampling")
         sampling.update_traces( marker=dict(size=12, line=dict(width=2, color= 'DarkSlateGrey')),
                                                             selector=dict(mode='markers'))
         
@@ -162,13 +163,13 @@ def interactive_plot(dataframe):
       yNew=np.dot(sampled_amplitude, np.sinc(sincM/T))
       fig, ax= plt.subplots()
       reconstruct=ax.plot(time, yNew,color='r' ,label="Reconstructed signal")
-      ax.stem(sampled_time, sampled_amplitude,'b',linefmt='k',basefmt="b",label="sampling points")
+      ax.stem(sampled_time, sampled_amplitude,'b',linefmt='b',basefmt="b",label="sampling points")
       fig.legend()
       plt.grid(True)
       plt.title("Reconstructed signal&Sampling",fontsize=10)
       plt.xlabel("Time")
       plt.ylabel("amplitude")
-      plt.xlim([0, 2])
+      plt.xlim([0, 1])
       plt.ylim([-1, 1])
 
       st.pyplot(fig)
