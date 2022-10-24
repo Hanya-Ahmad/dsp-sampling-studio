@@ -214,7 +214,7 @@ def generate_2():
             signal_label="signal with noise"
             st.session_state.added_signals = [{'name':signal_label,'x':time,'y':noise_signal}]
 
-        #else plot the main signal without noise  
+        #else plot the main signal without noise
         else:
             signal_label="signal"
             st.session_state.added_signals = [{'name':signal_label,'x':time,'y':sine}] 
@@ -274,6 +274,16 @@ def generate_2():
         plt.yticks(fontsize=20)
         plt.plot(time,yNew,'r-',label='Reconstructed wave')
 
+    def sampling(fsample,t,sin):
+        samp_frq=fsample
+        time_range=(max(t)-min(t))
+        samp_rate=int((len(t)/time_range)/((fsample)))
+        global samp_time, samp_amp
+        samp_time=t[::samp_rate]
+        samp_amp= sin[::samp_rate]
+        return samp_time,samp_amp
+
+    fsample = st.slider('Fs', 1,20)
     #helper function
     def cm_to_inch(value):
         return value/2.54
@@ -351,15 +361,11 @@ def generate_2():
         for dict in added_signals_list:
             remove_options.append(dict['name'])
         if(sampling_checkbox):
-            plt.subplot(4,1,2)
-            plt.cla()
             plt.subplot(4,1,4)
-            
         else:
             plt.subplot(4,1,2)
         plt.title("Resulting Signal")
         
-            
         st.write(remove_options)
         print(remove_options)
         if(len(st.session_state.added_signals)>1):
@@ -374,9 +380,6 @@ def generate_2():
         plt.yticks(fontsize=20)
         plt.axhline(y=0, color='k')
         plt.axvline(x=0, color='k')
-        if(noise_checkbox):
-            plt.subplot(4,1,2)
-            plt.plot(time,noise_signal,label="resulting signal with noise")
         y0=(added_signals_list[0])['y']
         for index in range(len(y0)):
             sum=0
@@ -390,20 +393,20 @@ def generate_2():
 
     if(sampling_checkbox & adding_waves_checkbox):
         max_frequency=max(st.session_state.frequencies_list)
-       
         added_samp_frequency=st.sidebar.slider("Sampling frequency for resulting signsl", min_value=0.5*max_frequency, max_value=float(5*max_frequency), step=0.5*max_frequency)
-        total_T=1/added_samp_frequency
-        total_n=np.arange(0,3/T)
-        total_nT=total_n*total_T
-        total_nT_array=np.array(total_nT)
-        st.write("max freq: ", max_frequency)
-        st.write("len(sum_amplitude)", len(sum_amplitude) )
-        st.write("len(total_nT)", len(total_nT )) 
-        signal_label="sampled points new"
-        total_sampled_amplitude=amplitude*np.sin(2 * np.pi * max_frequency * total_nT )
-        total_sampled_amplitude_array=np.array(total_sampled_amplitude)
+        sampling(added_samp_frequency, time, sum_amplitude)
+        # total_T=1/added_samp_frequency
+        # total_n=np.arange(0,3/T)
+        # total_nT=total_n*total_T
+        # total_nT_array=np.array(total_nT)
+        # st.write("max freq: ", max_frequency)
+        # st.write("len(sum_amplitude)", len(sum_amplitude) )
+        # st.write("len(total_nT)", len(total_nT )) 
+        # signal_label="sampled points new"
+        # total_sampled_amplitude=amplitude*np.sin(2 * np.pi * max_frequency * total_nT )
+        # total_sampled_amplitude_array=np.array(total_sampled_amplitude)
         if reconstruct_checkbox:
-            sinc_interp(total_sampled_amplitude,total_nT_array,time)
+            sinc_interp(samp_amp,samp_time,time)
         else:
             plt.subplot(4,1,3)
             
@@ -418,7 +421,7 @@ def generate_2():
         # Highlighting axis at x=0 and y=0
         plt.axhline(y=0, color='k')
         plt.axvline(x=0, color='k')
-        plt.stem(total_nT,total_sampled_amplitude,'b',label=signal_label,linefmt='b',basefmt=" ")
+        plt.stem(samp_time, samp_amp,'b',label=signal_label,linefmt='b',basefmt=" ")
         plt.legend(fontsize=16, loc='upper right')
             
     if(len(st.session_state.added_signals)>1):
@@ -433,7 +436,7 @@ def generate_2():
     st.write(st.session_state.added_signals)
     st.pyplot(fig)
     #hamada hamada
-    
+
 
 st.write("menus: ", menus)
 if menus=="Compose":

@@ -130,8 +130,8 @@ if (sampling_checkbox):
 
 
 def sinc_interp(nt_array, sampled_amplitude , time):
-    # if len(nt_array) != len(sampled_amplitude):
-    #     raise Exception('x and s must be the same length')
+    if len(nt_array) != len(sampled_amplitude):
+        raise Exception('x and s must be the same length')
     T = (sampled_amplitude[1] - sampled_amplitude[0])
     sincM = np.tile(time, (len(sampled_amplitude), 1)) - np.tile(sampled_amplitude[:, np.newaxis], (1, len(time)))
     yNew = np.dot(nt_array, np.sinc(sincM/T))
@@ -199,7 +199,7 @@ if(adding_waves_checkbox):
     added_frequency = st.sidebar.slider('frequency for added wave',1, 10, 1, 1)  # freq (Hz)
     added_amplitude=st.sidebar.slider('amplitude for added wave',1,10,1,1)
     added_sine=added_amplitude*np.sin(2*np.pi*added_frequency*time)
-    added_label=st.sidebar.text_input(label="enter signal name", max_chars=50)
+    added_label=st.sidebar.text_input(label="enter wave name", max_chars=50)
     add_wave_button=st.sidebar.button("Add Wave")
     
     #call the add_signal function when button is clicked
@@ -250,7 +250,8 @@ if(adding_waves_checkbox):
 
 if(sampling_checkbox & adding_waves_checkbox):
     max_frequency=max(st.session_state.frequencies_list)
-    total_T=1/2*max_frequency 
+    added_samp_frequency=st.sidebar.slider("Sampling frequency for resulting signsl", min_value=0.5*max_frequency, max_value=float(5*max_frequency), step=0.5*max_frequency)
+    total_T=1/added_samp_frequency
     total_n=np.arange(0,3/T)
     total_nT=total_n*total_T
     total_nT_array=np.array(total_nT)
@@ -258,12 +259,13 @@ if(sampling_checkbox & adding_waves_checkbox):
     st.write("len(sum_amplitude)", len(sum_amplitude) )
     st.write("len(total_nT)", len(total_nT )) 
     signal_label="sampled points new"
-    total_sampled_amplitude=sum_amplitude*np.sin(2 * np.pi * max_frequency * total_nT )
+    total_sampled_amplitude=amplitude*np.sin(2 * np.pi * max_frequency * total_nT )
     total_sampled_amplitude_array=np.array(total_sampled_amplitude)
     if reconstruct_checkbox:
         sinc_interp(total_sampled_amplitude,total_nT_array,time)
     else:
          plt.subplot(4,1,3)
+         
     plt.title("Sampled Wave")
     plt.xlabel('Time'+ r'$\rightarrow$',fontsize=20)
  #Setting y axis label for the plot
