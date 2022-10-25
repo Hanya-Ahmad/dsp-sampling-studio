@@ -1,3 +1,5 @@
+
+
 from distutils.command.upload import upload
 from email.policy import default
 from time import time
@@ -92,12 +94,35 @@ def interactive_plot(dataframe):
     #resulting signal with noise
     noise_signal=df['amplitude']+noise
     if(noise_checkbox):
-        plot = px.line(dataframe,x=time,y=noise_signal,width=800,height=600,title=uploaded_file.name,range_x=[0, 1],range_y=[-1,1.5], template="plotly_dark")
+        fig, ax= plt.subplots()
+        ax.plot(time, amplitude,color='r' ,label="original signal")
+        fig.legend()
+        plt.grid(True)
+        plt.xlabel("Time")
+        plt.ylabel("amplitude")
+        plt.xlim([0, 1])
+        plt.ylim([-1, 1])
+        if sampling_checkbox:
+            pass
+        else:    
+            st.pyplot(fig)
+         # plot = px.line(dataframe,x=time,y=noise_signal,width=800,height=600,title=uploaded_file.name,range_x=[0, 1],range_y=[-1,1.5], template="plotly_dark")
     else:
-        plot = px.line(dataframe,x=time,y=amplitude,width=800,height=600,title=uploaded_file.name,range_x=[0, 1],range_y=[-1,1.5], template="plotly_dark")
-    plot.update_traces(line=dict(color=col))
-    plot.update_xaxes(title_text='Time')
-    plot.update_yaxes(title_text='amplitude')
+        fig, ax= plt.subplots()
+        ax.plot(time, amplitude,color='r' ,label="original signal")
+        fig.legend()
+        plt.grid(True)
+        plt.xlabel("Time")
+        plt.ylabel("amplitude")
+        plt.xlim([0, 1])
+        plt.ylim([-1, 1])
+        if sampling_checkbox:
+            pass
+        else:    
+            st.pyplot(fig)    #     plot = px.line(dataframe,x=time,y=amplitude,width=800,height=600,title=uploaded_file.name,range_x=[0, 1],range_y=[-1,1.5], template="plotly_dark")
+    # plot.update_traces(line=dict(color=col))
+    # plot.update_xaxes(title_text='Time')
+    # plot.update_yaxes(title_text='amplitude')
     
     def sampling(dataframe):
         frequency=sampling_freq
@@ -122,12 +147,13 @@ def interactive_plot(dataframe):
         # sampling.update_traces( marker=dict(size=12, line=dict(width=2, color= 'DarkSlateGrey')),
         #                                                     selector=dict(mode='markers'))
         # sampling_points.plot.scatter(x='time', y='amplitude')
-        plt.scatter(sampling_points.x, sampling_points.y)
+        # plt.scatter(sampling_points.x, sampling_points.y)
+        ax.stem(sampling_time, sampling_amplitude,'b',linefmt='b',basefmt="b",label="sampling points")
+        fig.legend()
         if reconstruction_checkbox:
-                pass
-        else:
-            st.plotly_chart(sampling, use_container_width=True)
-        
+            pass
+        else:    
+            st.pyplot(fig)
         return sampling_points
 
 
@@ -153,11 +179,12 @@ def interactive_plot(dataframe):
       sincM=np.tile(time, (len(sampled_time), 1))-np.tile(sampled_time[:,np.newaxis],(1, len(time)))
       yNew=np.dot(sampled_amplitude, np.sinc(sincM/T))
       fig, ax= plt.subplots()
-      reconstruct=ax.plot(time, yNew,color='r' ,label="Reconstructed signal")
+      plt.plot(time, yNew,color='k' ,label="Reconstructed signal")
       ax.stem(sampled_time, sampled_amplitude,'b',linefmt='b',basefmt="b",label="sampling points")
+      ax.plot(time, amplitude,color='r' ,label="original signal")
       fig.legend()
       plt.grid(True)
-      plt.title("Reconstructed signal&Sampling",fontsize=10)
+      plt.title("Signals",fontsize=10)
       plt.xlabel("Time")
       plt.ylabel("amplitude")
       plt.xlim([0, 1])
@@ -169,7 +196,7 @@ def interactive_plot(dataframe):
         sinc_interpolation(df,sampling_points)
         
      
-    st.plotly_chart(plot)
+    # st.plotly_chart(plot)
 
 def generate_2():
     
