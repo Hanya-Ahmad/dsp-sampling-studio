@@ -1,4 +1,3 @@
-
 from distutils.command.upload import upload
 from email.policy import default
 from time import time
@@ -149,7 +148,7 @@ def interactive_plot(dataframe):
         #                                                     selector=dict(mode='markers'))
         # sampling_points.plot.scatter(x='time', y='amplitude')
         # plt.scatter(sampling_points.x, sampling_points.y)
-        ax.stem(sampling_time, sampling_amplitude,'b',linefmt='b',basefmt="b",label="sampling points")
+        ax.stem(sampling_time, sampling_amplitude,'b',linefmt='b',basefmt=" ",label="sampling points")
         fig.legend()
         if reconstruction_checkbox:
             pass
@@ -181,7 +180,7 @@ def interactive_plot(dataframe):
       yNew=np.dot(sampled_amplitude, np.sinc(sincM/T))
       fig, ax= plt.subplots()
       plt.plot(time, yNew,color='k' ,label="Reconstructed signal")
-      ax.stem(sampled_time, sampled_amplitude,'b',linefmt='b',basefmt="b",label="sampling points")
+      ax.stem(sampled_time, sampled_amplitude,'b',linefmt='b',basefmt=" ",label="sampling points")
       ax.plot(time, amplitude,color='r' ,label="original signal")
       fig.legend()
       ax.set_facecolor("#F3F3E2")
