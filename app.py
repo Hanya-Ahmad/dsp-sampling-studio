@@ -118,11 +118,10 @@ def interactive_plot(dataframe):
         else:
             sampling_points=pd.DataFrame({"time": sampling_time, "amplitude": sampling_amplitude})
 
-        # sampling=px.scatter(sampling_points, x=sampling_points.columns[0],range_x=[0, 1],range_y=[-1,1.5], y=sampling_points.columns[1], title="sampling")
-        # sampling.update_traces( marker=dict(size=12, line=dict(width=2, color= 'DarkSlateGrey')),
-        #                                                     selector=dict(mode='markers'))
-        # sampling_points.plot.scatter(x='time', y='amplitude')
-        plt.scatter(sampling_points.x, sampling_points.y)
+        sampling=px.scatter(sampling_points, x=sampling_points.columns[0],range_x=[0, 1],range_y=[-1,1.5], y=sampling_points.columns[1], title="sampling")
+        sampling.update_traces( marker=dict(size=12, line=dict(width=2, color= 'DarkSlateGrey')),
+                                                            selector=dict(mode='markers'))
+        
         if reconstruction_checkbox:
                 pass
         else:
