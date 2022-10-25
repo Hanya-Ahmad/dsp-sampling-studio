@@ -1,5 +1,4 @@
 
-
 from distutils.command.upload import upload
 from email.policy import default
 from time import time
@@ -97,6 +96,7 @@ def interactive_plot(dataframe):
         fig, ax= plt.subplots()
         ax.plot(time, amplitude,color='r' ,label="original signal")
         fig.legend()
+        ax.set_facecolor("#F3F3E2")
         plt.grid(True)
         plt.xlabel("Time")
         plt.ylabel("amplitude")
@@ -112,6 +112,7 @@ def interactive_plot(dataframe):
         ax.plot(time, amplitude,color='r' ,label="original signal")
         fig.legend()
         plt.grid(True)
+        ax.set_facecolor("#F3F3E2")
         plt.xlabel("Time")
         plt.ylabel("amplitude")
         plt.xlim([0, 1])
@@ -183,6 +184,7 @@ def interactive_plot(dataframe):
       ax.stem(sampled_time, sampled_amplitude,'b',linefmt='b',basefmt="b",label="sampling points")
       ax.plot(time, amplitude,color='r' ,label="original signal")
       fig.legend()
+      ax.set_facecolor("#F3F3E2")
       plt.grid(True)
       plt.title("Signals",fontsize=10)
       plt.xlabel("Time")
