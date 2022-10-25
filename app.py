@@ -31,7 +31,7 @@ st.set_page_config(
     
 )
 
-st.title("Sampling Sudio Web App.")
+st.title("Sampling Studio")
 
 menus= option_menu(menu_title="Select a page.",options=["Sample","Compose"],default_index=0,orientation=HORIZONTAL)
  
@@ -48,6 +48,7 @@ def generate ():
 
 
     if uploaded_file is not None:
+        
         noise_checkbox=st.sidebar.checkbox("Add noise",value=False)
         sampling_checkbox=st.sidebar.checkbox("sampling",value=False)
         reconstruction_checkbox=st.sidebar.checkbox("reconstruction",value=False)
@@ -159,25 +160,16 @@ def interactive_plot(dataframe):
 def generate_2():
     
     st.title("Sampling Studio")
-    st.sidebar.title("Options")
+
 
     #wave variables
-    st.markdown(
-        """
-    <style>
-    .sidebar .sidebar-content {
-        background-image: linear-gradient(#2e7bcf,#2e7bcf);
-        color: ""#FF4B4B";
-    }
-    </style>
-    """,
-        unsafe_allow_html=True,
-    )
+ 
     frequency = st.sidebar.slider('Frequency',1, 10, 1, 1)  # freq (Hz)
     amplitude=st.sidebar.slider('Amplitude',1,10,1,1)
     time= np.linspace(0, 3, 1200) #time steps
     sine = amplitude * np.sin(2 * np.pi * frequency* time) # sine wave 
     snr_db=0
+    signal_options=st.sidebar.multiselect('multiselect', ['Noise','Sampling','Add Waves'])
     noise_checkbox=st.sidebar.checkbox("Noise",value=False) 
     #show snr slider when noise checkbox is true
     if noise_checkbox:
@@ -426,8 +418,6 @@ def generate_2():
 
     st.pyplot(fig)
 
-
-st.write("menus: ", menus)
 if menus=="Compose":
     generate_2()
 

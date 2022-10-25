@@ -13,8 +13,6 @@ from starter import sinc_interpolation
 
 
 
-with open("design.css") as source_des:
-    st.markdown(f"<style>{source_des.read()}</style>",unsafe_allow_html=True)
 
 
 def generate_2():
@@ -34,7 +32,7 @@ def generate_2():
     """,
         unsafe_allow_html=True,
     )
-    frequency = st.sidebar.slider('Frequency', min_value=0.5*frequency, max_value=float(5*frequency), step=0.5*frequency)  # freq (Hz)
+    frequency = st.sidebar.slider('Frequency', min_value=1, max_value=10, step=1)  # freq (Hz)
     amplitude=st.sidebar.slider('Amplitude',1,10,1,1)
 
     ColorMinMax = st.markdown(''' <style> div.stSlider > div[data-baseweb = "slider"] > div[data-testid="stTickBar"] > div {
