@@ -1,27 +1,16 @@
 from ctypes.wintypes import PLARGE_INTEGER
-import itertools
 from itertools import count
 from signal import signal
-
 import matplotlib.pyplot as plt
-import mpld3
 import numpy as np
 import pandas as pd
 import plotly.express as px
 import plotly.figure_factory as ff
 import streamlit as st
 import streamlit.components.v1 as components
-
 from starter import sinc_interpolation
 
 
-st.set_page_config(
-    
-    page_title="Sampling Studio.",
-    page_icon="tv",
-    layout='centered'
-    
-)
 
 
 with open("design.css") as source_des:
@@ -45,8 +34,8 @@ def generate_2():
     """,
         unsafe_allow_html=True,
     )
-    frequency = st.sidebar.slider('frequency',1, 10, 1, 1)  # freq (Hz)
-    amplitude=st.sidebar.slider('amplitude',1,10,1,1)
+    frequency = st.sidebar.slider('Frequency', min_value=0.5*frequency, max_value=float(5*frequency), step=0.5*frequency)  # freq (Hz)
+    amplitude=st.sidebar.slider('Amplitude',1,10,1,1)
 
     ColorMinMax = st.markdown(''' <style> div.stSlider > div[data-baseweb = "slider"] > div[data-testid="stTickBar"] > div {
         background: rgb(1 1 1 / 0%); } </style>''', unsafe_allow_html = True)
@@ -72,7 +61,7 @@ def generate_2():
     time= np.linspace(0, 3, 1200) #time steps
     sine = amplitude * np.sin(2 * np.pi * frequency* time) # sine wave 
     snr_db=0
-    noise_checkbox=st.sidebar.checkbox("Add noise..",value=False) 
+    noise_checkbox=st.sidebar.checkbox("Noise",value=False) 
     #show snr slider when noise checkbox is true
     if noise_checkbox:
         snr_db=st.sidebar.number_input("SNR level",value=20,min_value=0,max_value=120,step=5)
@@ -124,9 +113,9 @@ def generate_2():
     #show fs slider when sampling checkbox is true
     if(sampling_checkbox):
         samp_freq=st.sidebar.slider("Sampling Frequency",min_value=1,max_value=100,value=20)
-        reconstruct_checkbox=st.sidebar.checkbox("reconstruct Sampling Signal", value=False)
+        reconstruct_checkbox=st.sidebar.checkbox("Reconstruct", value=False)
         
-    adding_waves_checkbox=st.sidebar.checkbox("adding waves", value=False)
+    adding_waves_checkbox=st.sidebar.checkbox("Add Waves", value=False)
 
     #if session state has no 'added signals' object then create one 
     if 'added_signals' not in st.session_state:
@@ -181,9 +170,6 @@ def generate_2():
         else:
             sampled_amplitude=amplitude*np.sin(2 * np.pi * frequency * nT )
             sampled_amplitude_array=np.array(sampled_amplitude)
-        st.write("len(sampled_amplitude)", len(sampled_amplitude) )
-        st.write("len(nT)", len(nT )) 
-
 
     def sinc_interp(nt_array, sampled_amplitude , time):
         if len(nt_array) != len(sampled_amplitude):
@@ -192,7 +178,6 @@ def generate_2():
         sincM = np.tile(time, (len(sampled_amplitude), 1)) - np.tile(sampled_amplitude[:, np.newaxis], (1, len(time)))
         yNew = np.dot(nt_array, np.sinc(sincM/T))
         plt.subplot(4,1,2)
-        plt.title("Sampled Wave")
         plt.xticks(fontsize=20)
         plt.yticks(fontsize=20)
         plt.plot(time,yNew,'r-',label='Reconstructed wave')
@@ -206,7 +191,6 @@ def generate_2():
 
     #set plot parameters
     plt.subplot(4,1,1)
-    plt.title("Sine Wave(s)")
     plt.xlabel('Time'+ r'$\rightarrow$',fontsize=20)
     plt.ylabel('Sin(time) '+ r'$\rightarrow$',fontsize=20)
     plt.grid()
@@ -219,11 +203,23 @@ def generate_2():
     signal_label=""
     if (noise_checkbox):
         signal_label="signal with noise"
+        plt.subplots_adjust(left=0.1,
+                    bottom=0.1,
+                    right=0.9,
+                    top=0.9,
+                    wspace=0.4,
+                    hspace=0.4)
         plt.plot(time, noise_signal,label=signal_label)
         plt.legend(fontsize=20, loc='upper right')
 
     else:
         signal_label="signal"
+        plt.subplots_adjust(left=0.1,
+                    bottom=0.1,
+                    right=0.9,
+                    top=0.9,
+                    wspace=0.4,
+                    hspace=0.4)
         plt.plot(time, sine,label=signal_label)
         plt.legend(fontsize=20, loc='upper right')
 
@@ -231,10 +227,8 @@ def generate_2():
     if(sampling_checkbox):
         signal_label="sampled points"
         if reconstruct_checkbox:
-            st.write("lengths comparison: ", len(sampled_amplitude), len(nT))
             sinc_interp( sampled_amplitude,nT_array , time)
         plt.subplot(4,1,2)
-        plt.title("Sampled Wave")
         plt.xlabel('Time'+ r'$\rightarrow$',fontsize=20)
     #Setting y axis label for the plot
         plt.ylabel('Sin(time) '+ r'$\rightarrow$',fontsize=20)
@@ -252,8 +246,8 @@ def generate_2():
 
     if(adding_waves_checkbox):
         
-        added_frequency = st.sidebar.slider('frequency for added wave',1, 10, 1, 1)  # freq (Hz)
-        added_amplitude=st.sidebar.slider('amplitude for added wave',1,10,1,1)
+        added_frequency = st.sidebar.slider('New Frequency',1, 10, 1, 1)  # freq (Hz)
+        added_amplitude=st.sidebar.slider('New Amplitude',1,10,1,1)
         ColorMinMax = st.markdown(''' <style> div.stSlider > div[data-baseweb = "slider"] > div[data-testid="stTickBar"] > div {
             background: rgb(1 1 1 / 0%); } </style>''', unsafe_allow_html = True)
 
@@ -274,7 +268,7 @@ def generate_2():
 
         ColorSlider = st.markdown(col, unsafe_allow_html = True)
         added_sine=added_amplitude*np.sin(2*np.pi*added_frequency*time)
-        added_label=st.sidebar.text_input(label="enter wave name", max_chars=50)
+        added_label=st.sidebar.text_input(label="Wave Name", max_chars=50)
         add_wave_button=st.sidebar.button("Add Wave")
         
         #call the add_signal function when button is clicked
@@ -282,7 +276,6 @@ def generate_2():
             add_signal(added_label,time,added_sine)
             st.session_state.frequencies_list.append(added_frequency)
 
-    st.write("frequencies list: ", st.session_state.frequencies_list)
 
     sum_amplitude=[]
 
@@ -296,10 +289,7 @@ def generate_2():
             plt.subplot(4,1,4)
         else:
             plt.subplot(4,1,2)
-        plt.title("Resulting Signal")
-        
-        st.write(remove_options)
-        print(remove_options)
+
         if(len(st.session_state.added_signals)>1):
             remove_wave_selectbox=st.sidebar.selectbox('Remove Wave',remove_options)
             remove_wave_button=st.sidebar.button('Remove')
@@ -318,21 +308,29 @@ def generate_2():
             for dict in added_signals_list:
                 sum+=dict['y'][index]
             sum_amplitude.append(sum)
-
+        plt.subplots_adjust(left=0.1,
+                    bottom=0.1,
+                    right=0.9,
+                    top=0.9,
+                    wspace=0.4,
+                    hspace=0.4)
         plt.plot(time,sum_amplitude,label="total")
         plt.legend()
 
 
     if(sampling_checkbox & adding_waves_checkbox):
-        max_frequency=max(st.session_state.frequencies_list)
-        added_samp_frequency=st.sidebar.slider("Sampling frequency for resulting signsl", min_value=0.5*max_frequency, max_value=float(5*max_frequency), step=0.5*max_frequency)
+        st.write(st.session_state.frequencies_list)
+        if(len(st.session_state.frequencies_list)==0):
+            max_frequency=frequency
+        else:
+            max_frequency=max(st.session_state.frequencies_list)
+        
+        st.write(st.session_state.frequencies_list)
+        added_samp_frequency=st.sidebar.slider("Sampling Frequency", min_value=0.5*max_frequency, max_value=float(5*max_frequency), step=0.5*max_frequency)
         total_T=1/added_samp_frequency
         total_n=np.arange(0,3/T)
         total_nT=total_n*total_T
         total_nT_array=np.array(total_nT)
-        st.write("max freq: ", max_frequency)
-        st.write("len(sum_amplitude)", len(sum_amplitude) )
-        st.write("len(total_nT)", len(total_nT )) 
         signal_label="sampled points new"
         total_sampled_amplitude=amplitude*np.sin(2 * np.pi * max_frequency * total_nT )
         total_sampled_amplitude_array=np.array(total_sampled_amplitude)
@@ -340,8 +338,6 @@ def generate_2():
             sinc_interp(total_sampled_amplitude,total_nT_array,time)
         else:
             plt.subplot(4,1,3)
-            
-        plt.title("Sampled Wave")
         plt.xlabel('Time'+ r'$\rightarrow$',fontsize=20)
     #Setting y axis label for the plot
         plt.ylabel('Sin(time) '+ r'$\rightarrow$',fontsize=20)
@@ -358,14 +354,19 @@ def generate_2():
     if(len(st.session_state.added_signals)>1):
         for i in range (1,len(st.session_state.added_signals)):
             plt.subplot(4,1,1)
+            plt.subplots_adjust(left=0.1,
+                    bottom=0.1,
+                    right=0.9,
+                    top=0.9,
+                    wspace=0.4,
+                    hspace=0.4)
             plt.plot(st.session_state.added_signals[i]['x'], st.session_state.added_signals[i]['y'],
             label=st.session_state.added_signals[i]['name'])
             plt.legend(fontsize=16)
     else:
         plt.subplot(4,1,2)
         plt.close()
-    st.write(st.session_state.added_signals)
     st.pyplot(fig)
-    #hamada hamada
+
 
 generate_2()
