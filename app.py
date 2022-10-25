@@ -103,7 +103,7 @@ def interactive_plot(dataframe):
         period=1/frequency
         no_cycles=dataframe.iloc[:,0].max()/period
         freq_sampling=2*frequency
-        no_points=dataframe.shape[0]
+        no_points=5000
         points_per_cycle=no_points/no_cycles
         step=points_per_cycle/freq_sampling
         sampling_time=[]
@@ -116,16 +116,30 @@ def interactive_plot(dataframe):
             sampling_points=pd.DataFrame({"time": sampling_time, "amplitude": noise_signal})
         else:
             sampling_points=pd.DataFrame({"time": sampling_time, "amplitude": sampling_amplitude})
-            
-        sampling=px.scatter(sampling_points, x=sampling_points.columns[0],range_x=[0, 1],range_y=[-1,1.5], y=sampling_points.columns[1], title="sampling")
-        sampling.update_traces( marker=dict(size=12, line=dict(width=2, color= 'DarkSlateGrey')),
-                                                            selector=dict(mode='markers'))
+
+        # sampling=px.scatter(sampling_points, x=sampling_points.columns[0],range_x=[0, 1],range_y=[-1,1.5], y=sampling_points.columns[1], title="sampling")
+        # sampling.update_traces( marker=dict(size=12, line=dict(width=2, color= 'DarkSlateGrey')),
+        #                                                     selector=dict(mode='markers'))
+        # sampling_points.plot.scatter(x='time', y='amplitude')
+        plt.scatter(sampling_points.x, sampling_points.y)
         if reconstruction_checkbox:
                 pass
         else:
             st.plotly_chart(sampling, use_container_width=True)
         
         return sampling_points
+
+
+# fig, ax= plt.subplots()
+#       reconstruct=ax.plot(time, yNew,color='r' ,label="Reconstructed signal")
+#       ax.stem(sampled_time, sampled_amplitude,'b',linefmt='b',basefmt="b",label="sampling points")
+#       fig.legend()
+#       plt.grid(True)
+#       plt.title("Reconstructed signal&Sampling",fontsize=10)
+#       plt.xlabel("Time")
+#       plt.ylabel("amplitude")
+#       plt.xlim([0, 1])
+#       plt.ylim([-1, 1])
 
     if(sampling_checkbox):
         sampling(df)
