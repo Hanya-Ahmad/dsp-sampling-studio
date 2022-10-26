@@ -43,7 +43,7 @@ st.set_page_config(
 
 with open("design.css") as source_des:
     st.markdown(f"<style>{source_des.read()}</style>",unsafe_allow_html=True)
-st.markdown("<h1 style='text-align: center;'>SAMPLING STUDIO WEB APP.</h1>", unsafe_allow_html=True)
+st.markdown("<h1 style='text-align: center;'>SAMPLING STUDIO</h1>", unsafe_allow_html=True)
 
 st.sidebar.success("Select a page.")
 
