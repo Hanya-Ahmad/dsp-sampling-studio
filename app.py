@@ -243,16 +243,7 @@ def generate_2():
         st.session_state['added_signals'] = []
         st.session_state.frequencies_list=[]
         #if noise checkbox is true then plot the main signal with noise
-        if(noise_checkbox):
-            signal_label="signal with noise"
-            st.session_state.added_signals = [{'name':signal_label,'x':time,'y':noise_signal}]
-
-        #else plot the main signal without noise
-        else:
-            signal_label="signal"
-            st.session_state.added_signals = [{'name':signal_label,'x':time,'y':sine}] 
-
-
+        
     st.markdown("""
     <style>
     .css-12gp8ed.eknhn3m4
@@ -335,11 +326,7 @@ def generate_2():
 
     # if noise checkbox is clicked plot noise signal against time
     signal_label=""
-    if (noise_checkbox):
-        signal_label="signal with noise"
-        plt.plot(time, noise_signal,label=signal_label)
-        plt.legend(fontsize=40, loc='upper right')
-
+   
  
 
     #execute sampling function if sampling checkbox is true
@@ -386,6 +373,7 @@ def generate_2():
 
     for dict in added_signals_list:
         remove_options.append(dict['name'])
+        
     if(sampling_checkbox):
         # plt.subplot(4,1,4)
         pass
@@ -394,7 +382,6 @@ def generate_2():
         # plt.subplot(4,1,2)
     plt.title("Resulting Signal",fontsize=40)
 
-    print(remove_options)
     if(len(st.session_state.added_signals)>1):
         remove_wave_selectbox=st.sidebar.selectbox('Remove Wave',remove_options)
         remove_wave_button=st.sidebar.button('Remove')
@@ -408,12 +395,18 @@ def generate_2():
     plt.axhline(y=0, color='k')
     plt.axvline(x=0, color='k')
     y0=(added_signals_list[0])['y']
+    
     for index in range(len(y0)):
         sum=0
         for dict in added_signals_list:
-            sum+=dict['y'][index]
+            if(noise_checkbox):
+                sum+=dict['y'][index]+noise[index]
+            else:
+                sum+=dict['y'][index]
         sum_amplitude.append(sum)
+    sum_amplitude_array=np.array(sum_amplitude)
     plt.plot(time,sum_amplitude,label="total")
+    st.write(len(sum_amplitude_array))
     plt.legend(fontsize=40, loc='upper right')
 
 
