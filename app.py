@@ -121,7 +121,7 @@ def interactive_plot(dataframe):
             pass
         else:    
             st.pyplot(fig)  
-    def sampling(dataframe):
+    def sampling(dataframe): 
         frequency=sampling_freq
         period=1/frequency
         no_cycles=dataframe.iloc[:,0].max()/period
