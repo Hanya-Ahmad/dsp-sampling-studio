@@ -181,6 +181,8 @@ except Exception as e:
     # st.write("You haven't uploaded a signal yet")  
     print(e)
 
+    
+
 #wave variables
 st.markdown(
     """
@@ -193,30 +195,20 @@ st.markdown(
 """,
     unsafe_allow_html=True,
 )
+optins_sel=st.sidebar.multiselect(label="sin options",options=['sampling','noise','reconstruct'])
+# noise_checkbox=st.sidebar.checkbox("Add noise..",value=False) 
+# sampling_checkbox=st.sidebar.checkbox("Sampling", value=False)
+# reconstruct_checkbox=st.sidebar.checkbox("reconstruct Sampling Signal", value=False)
+
 frequency = st.sidebar.slider('frequency',1, 10, 1, 1)  # freq (Hz)
 amplitude=st.sidebar.slider('amplitude',1,10,1,1)
+snr_db=st.sidebar.slider("SNR level",value=20,min_value=0,max_value=120,step=5)
+
 time= np.linspace(0, 3, 1200) #time steps
 sine = amplitude * np.sin(2 * np.pi * frequency* time) # sine wave 
-snr_db=0
-noise_checkbox=st.sidebar.checkbox("Add noise..",value=False) 
 #show snr slider when noise checkbox is true
-if noise_checkbox:
-    snr_db=st.sidebar.number_input("SNR level",value=20,min_value=0,max_value=120,step=5)
-    components.html(
-    """
-    <script>
-    const elements = window.parent.document.querySelectorAll('.stNumberInput div[data-baseweb="input"] > div')
-    console.log(elements)
-    elements[0].style.backgroundColor ="#F64848"
-    </script>
-    """,
-        height=0,
-        width=0,
-    )
 
-    
-sampling_checkbox=st.sidebar.checkbox("Sampling", value=False)
-
+samp_freq=st.sidebar.slider("Sampling Frequency",min_value=1,max_value=100,value=20)
 
 #noise variables
 power=sine**2
@@ -229,9 +221,7 @@ noise=np.random.normal(mean_noise,np.sqrt(noise_watts),len(sine))
 noise_signal=sine+noise
 
 #show fs slider when sampling checkbox is true
-if(sampling_checkbox):
-    samp_freq=st.sidebar.slider("Sampling Frequency",min_value=1,max_value=100,value=20)
-    reconstruct_checkbox=st.sidebar.checkbox("reconstruct Sampling Signal", value=False)
+
     
 
 
@@ -274,12 +264,12 @@ def remove_signal(deleted_name):
             break
 
 #sampling code
-if (sampling_checkbox):
+if ('sampling' in optins_sel):
     T=1/samp_freq 
     n=np.arange(0,3/T)
     nT=n*T
     nT_array=np.array(nT)
-    if(noise_checkbox):
+    if('noise' in optins_sel):
         sine_with_noise=amplitude* np.sin(2 * np.pi * frequency * nT)
         noise=np.random.normal(mean_noise,np.sqrt(noise_watts),len(sine_with_noise))
         sampled_amplitude=noise+sine_with_noise
@@ -332,7 +322,7 @@ plt.axvline(x=0, color='k')
 
 # if noise checkbox is clicked plot noise signal against time
 signal_label=""
-if (noise_checkbox):
+if ('noise' in optins_sel):
     signal_label="signal with noise"
     plt.plot(time, noise_signal,label=signal_label)
     plt.legend(fontsize=40, loc='upper right')
@@ -340,9 +330,9 @@ if (noise_checkbox):
 
 
 #execute sampling function if sampling checkbox is true
-if(sampling_checkbox):
+if('sampling' in optins_sel):
     signal_label="sampled points"
-    if reconstruct_checkbox:
+    if 'reconstruct' in optins_sel :
         sinc_interp( sampled_amplitude,nT_array , time)
     # plt.subplot(4,1,2)
     plt.title("Sampled Wave",fontsize=40)
@@ -383,12 +373,7 @@ remove_options=[]
 
 for dict in added_signals_list:
     remove_options.append(dict['name'])
-if(sampling_checkbox):
-    # plt.subplot(4,1,4)
-    pass
-else:
-    pass
-    # plt.subplot(4,1,2)
+
 plt.title("Resulting Signal",fontsize=40)
 
 print(remove_options)
@@ -414,12 +399,12 @@ plt.plot(time,sum_amplitude,label="total")
 plt.legend(fontsize=40, loc='upper right')
 
 
-if(sampling_checkbox & len(st.session_state.added_signals)>1):
+if(("sampling" in optins_sel ) & len(st.session_state.added_signals)>1):
     max_frequency=max(st.session_state.frequencies_list)
     added_samp_frequency=st.sidebar.slider("Sampling frequency for resulting signsl", min_value=0.5*max_frequency, max_value=float(5*max_frequency), step=0.5*max_frequency)
     sampling(added_samp_frequency, time, sum_amplitude)
     
-    if reconstruct_checkbox:
+    if 'reconstruct' in optins_sel:
         sinc_interp(samp_amp,samp_time,time)
     else:
         pass
