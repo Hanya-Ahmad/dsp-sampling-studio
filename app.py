@@ -72,14 +72,15 @@ def generate ():
         print(e)
             
 
-  
+st.markdown("<style> ul {display: none;} </style>", unsafe_allow_html=True)
+
 def interactive_plot(dataframe):
     snr_db=0
     if(noise_checkbox):
         snr_db=st.sidebar.number_input("SNR level",value=0,min_value=0,max_value=120,step=5)
     amplitude = df['amplitude'].tolist()
     time = df['time'].tolist()
-    col = st.sidebar.color_picker('Select a plot color','#0827F5')
+    # col = st.sidebar.color_picker('Select a plot color','#0827F5')
     mean=df['amplitude'].mean()
     std_deviation=df['amplitude'].std()
     power=df['amplitude']**2
@@ -299,10 +300,10 @@ def generate_2():
         yNew = np.dot(nt_array, np.sinc(sincM/T))
         # plt.subplot(4,1,2)
         plt.title("Sampled Wave")
-        plt.xticks(fontsize=20)
-        plt.yticks(fontsize=20)
+        plt.xticks(fontsize=40)
+        plt.yticks(fontsize=40)
         plt.plot(time,yNew,'r-',label='Reconstructed wave')
-
+        plt.legend(fontsize=40,loc='upper right')
     def sampling(fsample,t,sin):
         samp_frq=fsample
         time_range=(max(t)-min(t))
@@ -318,16 +319,17 @@ def generate_2():
         return value/2.54
 
     #change plot size
-    fig=plt.figure(figsize=(cm_to_inch(400),cm_to_inch(400)))
-
+    fig=plt.figure()
+    fig.set_figwidth(40)
+    fig.set_figheight(70)
     #set plot parameters
     plt.subplot(4,1,1)
     plt.title("Sine Wave(s)")
-    plt.xlabel('Time'+ r'$\rightarrow$',fontsize=20)
-    plt.ylabel('Sin(time) '+ r'$\rightarrow$',fontsize=20)
+    plt.xlabel('Time'+ r'$\rightarrow$',fontsize=40)
+    plt.ylabel('Sin(time) '+ r'$\rightarrow$',fontsize=40)
     plt.grid(True)
-    plt.xticks(fontsize=20)
-    plt.yticks(fontsize=20)
+    plt.xticks(fontsize=40)
+    plt.yticks(fontsize=40)
     plt.axhline(y=0, color='k')
     plt.axvline(x=0, color='k')
 
@@ -336,7 +338,7 @@ def generate_2():
     if (noise_checkbox):
         signal_label="signal with noise"
         plt.plot(time, noise_signal,label=signal_label)
-        plt.legend(fontsize=20, loc='upper right')
+        plt.legend(fontsize=40, loc='upper right')
 
  
 
@@ -346,19 +348,19 @@ def generate_2():
         if reconstruct_checkbox:
             sinc_interp( sampled_amplitude,nT_array , time)
         # plt.subplot(4,1,2)
-        plt.title("Sampled Wave")
-        plt.xlabel('Time'+ r'$\rightarrow$',fontsize=20)
+        plt.title("Sampled Wave",fontsize=40)
+        plt.xlabel('Time'+ r'$\rightarrow$',fontsize=40)
     #Setting y axis label for the plot
-        plt.ylabel('Sin(time) '+ r'$\rightarrow$',fontsize=20)
+        plt.ylabel('Sin(time) '+ r'$\rightarrow$',fontsize=40)
             # Showing grid
         plt.grid(True)
-        plt.xticks(fontsize=20)
-        plt.yticks(fontsize=20)
+        plt.xticks(fontsize=40)
+        plt.yticks(fontsize=40)
         # Highlighting axis at x=0 and y=0
         plt.axhline(y=0, color='k')
         plt.axvline(x=0, color='k')
         plt.stem(nT,sampled_amplitude,'b',label=signal_label,linefmt='b',basefmt=" ")
-        plt.legend(fontsize=16, loc='upper right')
+        plt.legend(fontsize=40, loc='upper right')
 
     #execute adding wave function if adding wave checkbox is true 
 
@@ -390,7 +392,7 @@ def generate_2():
     else:
         pass
         # plt.subplot(4,1,2)
-    plt.title("Resulting Signal")
+    plt.title("Resulting Signal",fontsize=40)
 
     print(remove_options)
     if(len(st.session_state.added_signals)>1):
@@ -398,11 +400,11 @@ def generate_2():
         remove_wave_button=st.sidebar.button('Remove')
         if(remove_wave_button):
             remove_signal(remove_wave_selectbox)
-    plt.xlabel('Time'+ r'$\rightarrow$',fontsize=20)
-    plt.ylabel('Sin(time) '+ r'$\rightarrow$',fontsize=20)
+    plt.xlabel('Time'+ r'$\rightarrow$',fontsize=40)
+    plt.ylabel('Sin(time) '+ r'$\rightarrow$',fontsize=40)
     plt.grid(True)
-    plt.xticks(fontsize=20)
-    plt.yticks(fontsize=20)
+    plt.xticks(fontsize=40)
+    plt.yticks(fontsize=40)
     plt.axhline(y=0, color='k')
     plt.axvline(x=0, color='k')
     y0=(added_signals_list[0])['y']
@@ -412,7 +414,7 @@ def generate_2():
             sum+=dict['y'][index]
         sum_amplitude.append(sum)
     plt.plot(time,sum_amplitude,label="total")
-    plt.legend()
+    plt.legend(fontsize=40, loc='upper right')
 
 
     if(sampling_checkbox & len(st.session_state.added_signals)>1):
@@ -426,14 +428,14 @@ def generate_2():
             pass
             # plt.subplot(4,1,3)
             
-        plt.title("Sampled Wave")
-        plt.xlabel('Time'+ r'$\rightarrow$',fontsize=20)
+        plt.title("Sampled Wave",fontsize=40)
+        plt.xlabel('Time'+ r'$\rightarrow$',fontsize=40)
     #Setting y axis label for the plot
-        plt.ylabel('Sin(time) '+ r'$\rightarrow$',fontsize=20)
+        plt.ylabel('Sin(time) '+ r'$\rightarrow$',fontsize=40)
             # Showing grid
         plt.grid()
-        plt.xticks(fontsize=20)
-        plt.yticks(fontsize=20)
+        plt.xticks(fontsize=40)
+        plt.yticks(fontsize=40)
         # Highlighting axis at x=0 and y=0
         plt.axhline(y=0, color='k')
         plt.axvline(x=0, color='k')
@@ -445,17 +447,12 @@ def generate_2():
             # plt.subplot(4,1,1)
             plt.plot(st.session_state.added_signals[i]['x'], st.session_state.added_signals[i]['y'],
             label=st.session_state.added_signals[i]['name'])
-            plt.legend(fontsize=16)
+            plt.legend(fontsize=25, loc='upper right')
     else:
         # plt.subplot(4,1,2)
         plt.close()
-    st.write("added signals")
-    st.write(st.session_state.added_signals)
     st.pyplot(fig)
-    #hamada hamada
 
-
-st.write("menus: ", menus)
 if menus=="Compose":
     generate_2()
 
