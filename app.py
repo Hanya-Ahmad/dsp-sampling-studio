@@ -53,11 +53,11 @@ global options
 
 if uploaded_file is not None:
     options=st.sidebar.multiselect(label='select csv optins ',options=['sampling','noise','reconstruct'])
-    noise_checkbox=st.sidebar.checkbox("Add noise",value=False)
-    snr_db=st.sidebar.number_input("SNR level",value=15,min_value=0,max_value=120,step=5)
-    sampling_checkbox=st.sidebar.checkbox("sampling",value=False)
+    # noise_checkbox=st.sidebar.checkbox("Add noise",value=False)
+    snr_db=st.sidebar.slider("SNR level",value=15,min_value=0,max_value=120,step=5)
+    # sampling_checkbox=st.sidebar.checkbox("sampling",value=False)
     sampling_freq=st.sidebar.slider(label="Sampling frequency",min_value=1,max_value=10,value=5)
-    reconstruction_checkbox=st.sidebar.checkbox("reconstruction",value=False)
+    # reconstruction_checkbox=st.sidebar.checkbox("reconstruction",value=False)
     try:
         df = pd.read_csv(uploaded_file)
         
@@ -230,7 +230,7 @@ if 'added_signals' not in st.session_state:
     st.session_state['added_signals'] = []
     st.session_state.frequencies_list=[]
     #if noise checkbox is true then plot the main signal with noise
-    if(noise_checkbox):
+    if('noise' in optins_sel):
         signal_label="signal with noise"
         st.session_state.added_signals = [{'name':signal_label,'x':time,'y':noise_signal}]
 
