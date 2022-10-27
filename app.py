@@ -52,8 +52,10 @@ global snr_db
 global options
 
 if uploaded_file is not None:
+    
     options=st.sidebar.multiselect(label='select csv optins ',options=['sampling','noise','reconstruct'])
     # noise_checkbox=st.sidebar.checkbox("Add noise",value=False)
+    
     snr_db=st.sidebar.slider("SNR level",value=15,min_value=0,max_value=120,step=5)
     # sampling_checkbox=st.sidebar.checkbox("sampling",value=False)
     sampling_freq=st.sidebar.slider(label="Sampling frequency",min_value=1,max_value=10,value=5)
@@ -195,7 +197,7 @@ st.markdown(
 """,
     unsafe_allow_html=True,
 )
-optins_sel=st.sidebar.multiselect(label="sin options",options=['sampling','noise','reconstruct'])
+options_sel=st.sidebar.multiselect(label="sin options",options=['sampling','noise','reconstruct'])
 # noise_checkbox=st.sidebar.checkbox("Add noise..",value=False) 
 # sampling_checkbox=st.sidebar.checkbox("Sampling", value=False)
 # reconstruct_checkbox=st.sidebar.checkbox("reconstruct Sampling Signal", value=False)
@@ -229,6 +231,9 @@ noise_signal=sine+noise
 if 'added_signals' not in st.session_state:
     st.session_state['added_signals'] = []
     st.session_state.frequencies_list=[]
+    signal_label="total"
+    st.session_state.added_signals = [{'name':signal_label,'x':time,'y':sine}] 
+
     
 st.markdown("""
 <style>
@@ -254,12 +259,12 @@ def remove_signal(deleted_name):
             break
 
 #sampling code
-if ('sampling' in optins_sel):
+if ('sampling' in options_sel):
     T=1/samp_freq 
     n=np.arange(0,3/T)
     nT=n*T
     nT_array=np.array(nT)
-    if('noise' in optins_sel):
+    if('noise' in options_sel):
         sine_with_noise=amplitude* np.sin(2 * np.pi * frequency * nT)
         noise=np.random.normal(mean_noise,np.sqrt(noise_watts),len(sine_with_noise))
         sampled_amplitude=noise+sine_with_noise
@@ -281,6 +286,7 @@ def sinc_interp(nt_array, sampled_amplitude , time):
     plt.yticks(fontsize=40)
     plt.plot(time,yNew,'r-',label='Reconstructed wave')
     plt.legend(fontsize=40,loc='upper right')
+    
 def sampling(fsample,t,sin):
     samp_frq=fsample
     time_range=(max(t)-min(t))
@@ -316,9 +322,9 @@ signal_label=""
  
 
 #execute sampling function if sampling checkbox is true
-if('sampling' in optins_sel):
+if('sampling' in options_sel):
     signal_label="sampled points"
-    if 'reconstruct' in optins_sel :
+    if 'reconstruct' in options_sel :
         sinc_interp( sampled_amplitude,nT_array , time)
     # plt.subplot(4,1,2)
     plt.title("Sampled Wave",fontsize=40)
@@ -360,9 +366,8 @@ remove_options=[]
 for dict in added_signals_list:
     remove_options.append(dict['name'])
 
-plt.title("Resulting Signal",fontsize=40)
 
-print(remove_options)
+
 if(len(st.session_state.added_signals)>1):
     remove_wave_selectbox=st.sidebar.selectbox('Remove Wave',remove_options)
     remove_wave_button=st.sidebar.button('Remove')
@@ -375,11 +380,13 @@ plt.xticks(fontsize=40)
 plt.yticks(fontsize=40)
 plt.axhline(y=0, color='k')
 plt.axvline(x=0, color='k')
+
 y0=(added_signals_list[0])['y']
+
 for index in range(len(y0)):
     sum=0
     for dict in added_signals_list:
-        if(noise_checkbox):
+        if 'noise' in options_sel:
             sum+=dict['y'][index]+noise[index]
         else:
             sum+=dict['y'][index]
@@ -389,12 +396,12 @@ plt.plot(time,sum_amplitude,label="total")
 plt.legend(fontsize=40, loc='upper right')
 
 
-if(("sampling" in optins_sel ) & len(st.session_state.added_signals)>1):
+if(("sampling" in options_sel ) & len(st.session_state.added_signals)>1):
     max_frequency=max(st.session_state.frequencies_list)
     added_samp_frequency=st.sidebar.slider("Sampling frequency for resulting signsl", min_value=0.5*max_frequency, max_value=float(5*max_frequency), step=0.5*max_frequency)
     sampling(added_samp_frequency, time, sum_amplitude)
     
-    if 'reconstruct' in optins_sel:
+    if 'reconstruct' in options_sel:
         sinc_interp(samp_amp,samp_time,time)
     else:
         pass
