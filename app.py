@@ -88,6 +88,8 @@ def interactive_plot(df):
         else:    
             st.pyplot(fig)  
     def sampling(dataframe): 
+        if(noise_checkbox):
+            pd.concat([df['time'], noise_signal['amplitude']], axis=1, keys=['time', 'amplitude_noise'])
         frequency=sampling_freq
         period=1/frequency
         no_cycles=dataframe.iloc[:,0].max()/period
