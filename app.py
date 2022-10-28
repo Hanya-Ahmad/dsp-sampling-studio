@@ -3,7 +3,7 @@ import streamlit as st
 from streamlit_option_menu import option_menu
 import matplotlib.pyplot as plt 
 import numpy as np
-import csvsignal
+
 import pandas as pd
 
 st.set_page_config(
