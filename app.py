@@ -327,12 +327,7 @@ if('sampling' in options_sel):
         sampled_amplitude=amplitude*np.sin(2 * np.pi * max_frequency * nT )
         
 
-    
-#execute adding wave function if adding wave checkbox is true 
-
-
-
-added_frequency = st.sidebar.slider('frequency for added wave',1, 10, 1, 1)  # freq (Hz)
+dded_frequency = st.sidebar.slider('frequency for added wave',1, 10, 1, 1)  # freq (Hz)
 added_amplitude=st.sidebar.slider('amplitude for added wave',1,10,1,1)
 added_sine=added_amplitude*np.sin(2*np.pi*added_frequency*time)
 added_label=st.sidebar.text_input(label="enter wave name", max_chars=50)
