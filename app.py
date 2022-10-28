@@ -350,6 +350,7 @@ if(add_wave_button):
 added_signals_list=st.session_state.added_signals
 remove_options=[]
 
+
 for dict in added_signals_list:
     remove_options.append(dict['name'])
 remove_options.remove('total')
