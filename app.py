@@ -1,4 +1,3 @@
-
 from distutils.command.upload import upload
 import streamlit as st 
 from streamlit_option_menu import option_menu
@@ -149,7 +148,6 @@ try:
     interactive_plot(df)
 
 except Exception as e:
-    # st.write("You haven't uploaded a signal yet")  
     print(e)
 
     
@@ -167,12 +165,9 @@ st.markdown(
     unsafe_allow_html=True,
 )
 options_sel=st.sidebar.multiselect(label="Composer Options",options=['sampling','noise','reconstruct'])
-# noise_checkbox=st.sidebar.checkbox("Add noise..",value=False) 
-# sampling_checkbox=st.sidebar.checkbox("Sampling", value=False)
-# reconstruct_checkbox=st.sidebar.checkbox("reconstruct Sampling Signal", value=False)
 def update_slider():
-    st.write("freq: ",st.session_state.frequency)
-    st.write("amp: ", st.session_state.amplitude)
+    st.session_state.frequency
+    st.session_state.amplitude
 
 frequency = st.sidebar.slider('Frequency',key="frequency", value=1, max_value=10, min_value=1, step=1, on_change=update_slider)  # freq (Hz)
 amplitude=st.sidebar.slider('Amplitude',key="amplitude", value=1, max_value=10, min_value=1, step=1, on_change=update_slider)
@@ -233,12 +228,11 @@ def sinc_interp(nt_array, sampled_amplitude , time):
     T = (sampled_amplitude[1] - sampled_amplitude[0])
     sincM = np.tile(time, (len(sampled_amplitude), 1)) - np.tile(sampled_amplitude[:, np.newaxis], (1, len(time)))
     yNew = np.dot(nt_array, np.sinc(sincM/T))
-    # plt.subplot(4,1,2)
     plt.title("Sampled Wave")
-    plt.xticks(fontsize=40)
-    plt.yticks(fontsize=40)
-    plt.plot(time,yNew,'r-',label='Reconstructed Signal')
-    plt.legend(fontsize=40,loc='upper right')
+    plt.xticks(fontsize=10)
+    plt.yticks(fontsize=10)
+    ax.plot(time,yNew,'r-',label='Reconstructed Signal')
+    plt.legend(fontsize=8.5,bbox_to_anchor=(1.1, 1.05))
     
 def sampling(fsample,t,sin):
     time_range=(max(t)-min(t))
@@ -258,13 +252,13 @@ fig=plt.figure()
 fig.set_figwidth(40)
 fig.set_figheight(70)
 #set plot parameters
-plt.subplot(4,1,1)
+fig, ax = plt.subplots(figsize=(8.5, 5))
 plt.title("Sine Wave(s)")
-plt.xlabel('Time'+ r'$\rightarrow$',fontsize=40)
-plt.ylabel('Sin(time) '+ r'$\rightarrow$',fontsize=40)
+plt.xlabel('Time'+ r'$\rightarrow$',fontsize=10)
+plt.ylabel('Sin(time) '+ r'$\rightarrow$',fontsize=10)
 plt.grid(True)
-plt.xticks(fontsize=40)
-plt.yticks(fontsize=40)
+plt.xticks(fontsize=10)
+plt.yticks(fontsize=10)
 plt.axhline(y=0, color='k')
 plt.axvline(x=0, color='k')
 
@@ -300,26 +294,26 @@ if('sampling' in options_sel):
         pass
         # plt.subplot(4,1,3)
         
-    plt.title("Sampled Wave",fontsize=40)
-    plt.xlabel('Time'+ r'$\rightarrow$',fontsize=40)
+    plt.title("Sampled Wave",fontsize=10)
+    plt.xlabel('Time'+ r'$\rightarrow$',fontsize=10)
 #Setting y axis label for the plot
-    plt.ylabel('Sin(time) '+ r'$\rightarrow$',fontsize=40)
+    plt.ylabel('Sin(time) '+ r'$\rightarrow$',fontsize=10)
         # Showing grid
     plt.grid(True)
-    plt.xticks(fontsize=40)
-    plt.yticks(fontsize=40)
+    plt.xticks(fontsize=10)
+    plt.yticks(fontsize=10)
     # Highlighting axis at x=0 and y=0
     plt.axhline(y=0, color='k')
     plt.axvline(x=0, color='k')
-    plt.stem(samp_time, samp_amp,'b',label=signal_label,linefmt='b',basefmt=" ")
-    plt.legend(fontsize=16, loc='upper right')
+    ax.stem(samp_time, samp_amp,'b',label=signal_label,linefmt='b',basefmt=" ")
+    plt.legend(fontsize=8.5, bbox_to_anchor=(1.1, 1.05))
         
     T=1/added_samp_frequency
     n=np.arange(0,3/T)
     nT=n*T
     nT_array=np.array(nT)
     if('noise' in options_sel):
-        st.write("noise selected")
+        # st.write("noise selected")
         sine_with_noise=amplitude* np.sin(2 * np.pi * max_frequency * nT)
         noise=np.random.normal(mean_noise,np.sqrt(noise_watts),len(sine_with_noise))
         sampled_amplitude=noise+sine_with_noise
@@ -364,29 +358,27 @@ if(len(st.session_state.added_signals)>1):
     remove_wave_button=st.sidebar.button('Remove')
     if(remove_wave_button):
         remove_signal(remove_wave_selectbox)
-plt.xlabel('Time'+ r'$\rightarrow$',fontsize=40)
-plt.ylabel('Sin(time) '+ r'$\rightarrow$',fontsize=40)
+plt.xlabel('Time'+ r'$\rightarrow$',fontsize=10)
+plt.ylabel('Sin(time) '+ r'$\rightarrow$',fontsize=10)
 plt.grid(True)
-plt.xticks(fontsize=40)
-plt.yticks(fontsize=40)
+plt.xticks(fontsize=10)
+plt.yticks(fontsize=10)
 plt.axhline(y=0, color='k')
 plt.axvline(x=0, color='k')
 
 
 
 sum_amplitude_array=np.array(sum_amplitude)
-plt.plot(time,sum_amplitude,label="Resulting Signal")
-plt.legend(fontsize=40, loc='upper right')
+ax.plot(time,sum_amplitude,label="Resulting Signal")
+plt.legend(fontsize=8.5, bbox_to_anchor=(1.1, 1.05))
 
 
 
 if(len(st.session_state.added_signals)>1):
     for i in range (1,len(st.session_state.added_signals)):
-        # plt.subplot(4,1,1)
-        plt.plot(st.session_state.added_signals[i]['x'], st.session_state.added_signals[i]['y'],
+        ax.plot(st.session_state.added_signals[i]['x'], st.session_state.added_signals[i]['y'],
         label=st.session_state.added_signals[i]['name'])
-        plt.legend(fontsize=25, loc='upper right')
+        plt.legend(fontsize=8.5, bbox_to_anchor=(1.1, 1.05))
 else:
-    # plt.subplot(4,1,2)
     plt.close()
 st.pyplot(fig)
