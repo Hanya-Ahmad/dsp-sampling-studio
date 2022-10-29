@@ -7,9 +7,6 @@ import numpy as np
 import pandas as pd
 
 global df
-global noise_checkbox
-global sampling_checkbox
-global reconstruction_checkbox
 global sampling_freq
 global snr_db
 global options
@@ -60,6 +57,8 @@ def interactive_plot(dataframe):
         plt.ylabel("amplitude")
         plt.xlim([0, 1])
         plt.ylim([-1, 1])
+        plt.axhline(y=0, color='k')
+        plt.axvline(x=0, color='k')
         if 'sampling' in options:
             pass
         else:    
@@ -74,6 +73,9 @@ def interactive_plot(dataframe):
         plt.ylabel("amplitude")
         plt.xlim([0, 1])
         plt.ylim([-1, 1])
+        plt.axvline(x=0, color='k')
+        plt.axhline(y=0, color='k')
+
         if 'sampling' in options:
             pass
         else:    
@@ -132,7 +134,8 @@ def interactive_plot(dataframe):
       plt.ylabel("amplitude")
       plt.xlim([0, 1])
       plt.ylim([-1, 1])
-
+      plt.axvline(x=0, color='k')
+      plt.axhline(y=0, color='k')
       st.pyplot(fig)
 
     if(('reconstruct' in options) and ('noise' not in options )):
