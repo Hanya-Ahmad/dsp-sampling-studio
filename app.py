@@ -3,36 +3,12 @@ import streamlit as st
 from streamlit_option_menu import option_menu
 import matplotlib.pyplot as plt 
 import numpy as np
-# css-hxt7ib e1fqkh3o4
-st.markdown("""
-  <style>
-    .css-hvrj08 e1tzin5v3{
-      margin-top: -75px;
-    }
-  </style>
-""", unsafe_allow_html=True)
 import pandas as pd
-st.markdown("""
-        <style>
-               .css-18e3th9 {
-                    padding-top: 0rem;
-                    padding-bottom: 10rem;
-                    padding-left: 5rem;
-                    padding-right: 5rem;
-                }
-               .css-1d391kg {
-                    padding-top: 3.5rem;
-                    padding-right: 1rem;
-                    padding-bottom: 3.5rem;
-                    padding-left: 1rem;
-                }
-        </style>
-        """, unsafe_allow_html=True)
 global df
 global sampling_freq
 global snr_db
 global options
-col1,col3,col2 = st.sidebar.columns((125,1,125))
+col1,col2 = st.sidebar.columns((125,125))
 uploaded_file = st.file_uploader(label="", type=['csv', 'xlsx'])
 if uploaded_file is not None:
     
