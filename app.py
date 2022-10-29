@@ -1,3 +1,4 @@
+
 from distutils.command.upload import upload
 import streamlit as st 
 from streamlit_option_menu import option_menu
@@ -69,7 +70,7 @@ def interactive_plot(dataframe):
         ax.plot(time, amplitude,color='r' ,label="Original Signal")
         fig.legend()
         plt.grid(True)
-        ax.set_facecolor("#F3F3E2")
+        # ax.set_facecolor("#F3F3E2")
         plt.xlabel("Time")
         plt.ylabel("amplitude")
         plt.xlim([0, 1])
@@ -120,9 +121,12 @@ def interactive_plot(dataframe):
       fig, ax= plt.subplots()
       plt.plot(time, yNew,color='k' ,label="Reconstructed Signal")
       ax.stem(sampled_time, sampled_amplitude,'b',linefmt='b',basefmt="b",label="Sampling Points")
-      ax.plot(time, amplitude,color='r' ,label="Original Signal")
+      if('noise' in options):
+         ax.plot(time, noise_signal,color='r' ,label="Original Signal")
+      if('noise' not in options):
+        ax.plot(time, amplitude,color='r' ,label="Original Signal")
       fig.legend()
-      ax.set_facecolor("#F3F3E2")
+    #   ax.set_facecolor("#F3F3E2")
       plt.grid(True)
       plt.title("Signals",fontsize=10)
       plt.xlabel("Time")
@@ -132,9 +136,12 @@ def interactive_plot(dataframe):
 
       st.pyplot(fig)
 
-    if('reconstruct' in options):
+    if(('reconstruct' in options) and ('noise' not in options )):
         sinc_interpolation(df,sampling_points)
-        
+      
+    elif(('reconstruct' in options)and ('noise'  in options)):
+             sinc_interpolation(dataframe_noise,sampling_points)
+
      
     
 try:
@@ -383,10 +390,3 @@ else:
     # plt.subplot(4,1,2)
     plt.close()
 st.pyplot(fig)
-
-# if menus=="Compose":
-#     generate_2()
-
-
-# if menus=="Sample":
-#     generate()
