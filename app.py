@@ -164,15 +164,14 @@ options_sel=st.sidebar.multiselect(label="Composer Options",options=['sampling',
 # sampling_checkbox=st.sidebar.checkbox("Sampling", value=False)
 # reconstruct_checkbox=st.sidebar.checkbox("reconstruct Sampling Signal", value=False)
 def update_slider():
-    st.write("freq: ",st.session_state.frequency)
-    st.write("amp: ", st.session_state.amplitude)
+    (st.session_state.added_signals[0])['y']= amplitude * np.sin(2 * np.pi * frequency* time) 
 
 frequency = st.sidebar.slider('Frequency',key="frequency", value=1, max_value=10, min_value=1, step=1, on_change=update_slider)  # freq (Hz)
 amplitude=st.sidebar.slider('Amplitude',key="amplitude", value=1, max_value=10, min_value=1, step=1, on_change=update_slider)
 snr_db=st.sidebar.slider("SNR",value=20,min_value=0,max_value=120,step=5)
 
 time= np.linspace(0, 3, 1200) #time steps
-sine = st.session_state.amplitude * np.sin(2 * np.pi * st.session_state.frequency* time) # sine wave 
+sine = amplitude * np.sin(2 * np.pi * frequency* time) # sine wave 
 #show snr slider when noise checkbox is true
 
 samp_freq=st.sidebar.slider("Sampling Frequency",min_value=1,max_value=100,value=20)
@@ -190,7 +189,8 @@ noise_signal=sine+noise
 if 'added_signals' not in st.session_state:
     st.session_state['added_signals'] = []
     st.session_state.frequencies_list=[]
- 
+    
+    
     signal_label="Resulting Signal"
     st.session_state.added_signals = [{'name':signal_label,'x':time,'y':sine}] 
 
@@ -335,7 +335,8 @@ add_wave_button=st.sidebar.button("Add Wave")
 
 #call the add_signal function when button is clicked
 if(add_wave_button):
-    
+    st.write(len(st.session_state.added_signals))
+
     add_signal(added_label,time,added_sine)
     st.session_state.frequencies_list.append(added_frequency)
 
