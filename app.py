@@ -55,7 +55,7 @@ def interactive_plot(dataframe):
         fig, ax= plt.subplots()
         ax.plot(time, noise_signal,color='r' ,label="Original Signal")
         fig.legend()
-        ax.set_facecolor("#F3F3E2")
+        # ax.set_facecolor("#F3F3E2")
         plt.grid(True)
         plt.xlabel("Time")
         plt.ylabel("amplitude")
