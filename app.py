@@ -174,7 +174,7 @@ amplitude=st.sidebar.slider('Amplitude',key="amplitude", value=1, max_value=10, 
 snr_db=st.sidebar.slider("SNR",value=20,min_value=0,max_value=120,step=5)
 
 time= np.linspace(0, 3, 1200) #time steps
-sine = amplitude * np.sin(2 * np.pi * frequency* time) # sine wave 
+sine = st.session_state.amplitude * np.sin(2 * np.pi * st.session_state.frequency* time) # sine wave 
 #show snr slider when noise checkbox is true
 
 samp_freq=st.sidebar.slider("Sampling Frequency",min_value=1,max_value=100,value=20)
@@ -192,8 +192,7 @@ noise_signal=sine+noise
 if 'added_signals' not in st.session_state:
     st.session_state['added_signals'] = []
     st.session_state.frequencies_list=[]
-    
-    
+ 
     signal_label="Resulting Signal"
     st.session_state.added_signals = [{'name':signal_label,'x':time,'y':sine}] 
 
@@ -337,8 +336,7 @@ add_wave_button=st.sidebar.button("Add Wave")
 
 #call the add_signal function when button is clicked
 if(add_wave_button):
-    st.write(len(st.session_state.added_signals))
-
+    
     add_signal(added_label,time,added_sine)
     st.session_state.frequencies_list.append(added_frequency)
 
