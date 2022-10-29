@@ -3,23 +3,45 @@ import streamlit as st
 from streamlit_option_menu import option_menu
 import matplotlib.pyplot as plt 
 import numpy as np
-
+# css-hxt7ib e1fqkh3o4
+st.markdown("""
+  <style>
+    .css-hvrj08 e1tzin5v3{
+      margin-top: -75px;
+    }
+  </style>
+""", unsafe_allow_html=True)
 import pandas as pd
-
+st.markdown("""
+        <style>
+               .css-18e3th9 {
+                    padding-top: 0rem;
+                    padding-bottom: 10rem;
+                    padding-left: 5rem;
+                    padding-right: 5rem;
+                }
+               .css-1d391kg {
+                    padding-top: 3.5rem;
+                    padding-right: 1rem;
+                    padding-bottom: 3.5rem;
+                    padding-left: 1rem;
+                }
+        </style>
+        """, unsafe_allow_html=True)
 global df
 global sampling_freq
 global snr_db
 global options
-
+col1,col3,col2 = st.sidebar.columns((125,1,125))
 uploaded_file = st.file_uploader(label="", type=['csv', 'xlsx'])
 if uploaded_file is not None:
     
-    options=st.sidebar.multiselect(label='CSV Options ',options=['sampling','noise','reconstruct'])
+    options=col1.multiselect(label='CSV Options ',options=['sampling','noise','reconstruct'])
     # noise_checkbox=st.sidebar.checkbox("Add noise",value=False)
     
-    snr_db=st.sidebar.slider("SNR",value=15,min_value=0,max_value=120,step=5)
+    snr_db=col1.slider("SNR",value=15,min_value=0,max_value=120,step=5)
     # sampling_checkbox=st.sidebar.checkbox("sampling",value=False)
-    sampling_freq=st.sidebar.slider(label="Sampling Frequency",min_value=1,max_value=10,value=5)
+    sampling_freq=col1.slider(label="Sampling Frequency",min_value=1,max_value=10,value=5)
     # reconstruction_checkbox=st.sidebar.checkbox("reconstruction",value=False)
     try:
         df = pd.read_csv(uploaded_file)
@@ -29,12 +51,11 @@ if uploaded_file is not None:
         df = pd.read_excel(uploaded_file)
 
 
-def interactive_plot(dataframe):
+def interactive_plot(df):
     amplitude = df['amplitude'].tolist()
     time = df['time'].tolist()
     # col = st.sidebar.color_picker('Select a plot color','#0827F5')
-    mean=df['amplitude'].mean()
-    std_deviation=df['amplitude'].std()
+
     power=df['amplitude']**2
     signal_average_power=np.mean(power)
     signal_averagePower_db=10*np.log10(signal_average_power)
@@ -57,8 +78,6 @@ def interactive_plot(dataframe):
         plt.ylabel("amplitude")
         plt.xlim([0, 1])
         plt.ylim([-1, 1])
-        plt.axhline(y=0, color='k')
-        plt.axvline(x=0, color='k')
         if 'sampling' in options:
             pass
         else:    
@@ -73,9 +92,6 @@ def interactive_plot(dataframe):
         plt.ylabel("amplitude")
         plt.xlim([0, 1])
         plt.ylim([-1, 1])
-        plt.axvline(x=0, color='k')
-        plt.axhline(y=0, color='k')
-
         if 'sampling' in options:
             pass
         else:    
@@ -134,8 +150,7 @@ def interactive_plot(dataframe):
       plt.ylabel("amplitude")
       plt.xlim([0, 1])
       plt.ylim([-1, 1])
-      plt.axvline(x=0, color='k')
-      plt.axhline(y=0, color='k')
+
       st.pyplot(fig)
 
     if(('reconstruct' in options) and ('noise' not in options )):
@@ -167,20 +182,26 @@ st.markdown(
 """,
     unsafe_allow_html=True,
 )
-options_sel=st.sidebar.multiselect(label="Composer Options",options=['sampling','noise','reconstruct'])
+options_sel=col1.multiselect(label="Composer Options",options=['sampling','noise','reconstruct'])
+
 def update_slider():
-    st.session_state.frequency
-    st.session_state.amplitude
+    if(len(st.session_state.added_signals)==1):
+        (st.session_state.added_signals[0])['y']=st.session_state.amplitude * np.sin(2 * np.pi * st.session_state.frequency* time)
+    else:
+        st.session_state.frequency
+        st.session_state.amplitude
 
-frequency = st.sidebar.slider('Frequency',key="frequency", value=1, max_value=10, min_value=1, step=1, on_change=update_slider)  # freq (Hz)
-amplitude=st.sidebar.slider('Amplitude',key="amplitude", value=1, max_value=10, min_value=1, step=1, on_change=update_slider)
-snr_db=st.sidebar.slider("SNR",value=20,min_value=0,max_value=120,step=5)
 
+frequency = col1.slider('Frequency',key="frequency", value=1, max_value=10, min_value=1, step=1, on_change=update_slider)  # freq (Hz)
+if uploaded_file is not None:
+    amplitude=col2.slider('Amplitude',key="amplitude", value=1, max_value=10, min_value=1, step=1, on_change=update_slider)
+else:
+    amplitude=col1.slider('Amplitude',key="amplitude", value=1, max_value=10, min_value=1, step=1, on_change=update_slider)
+    snr_db=col1.slider("SNR",value=20,min_value=0,max_value=120,step=5)
 time= np.linspace(0, 3, 1200) #time steps
-sine = st.session_state.amplitude * np.sin(2 * np.pi * st.session_state.frequency* time) # sine wave 
+sine = amplitude * np.sin(2 * np.pi * frequency* time) # sine wave 
 #show snr slider when noise checkbox is true
 
-samp_freq=st.sidebar.slider("Sampling Frequency",min_value=1,max_value=100,value=20)
 
 #noise variables
 power=sine**2
@@ -195,7 +216,8 @@ noise_signal=sine+noise
 if 'added_signals' not in st.session_state:
     st.session_state['added_signals'] = []
     st.session_state.frequencies_list=[]
- 
+    
+    
     signal_label="Resulting Signal"
     st.session_state.added_signals = [{'name':signal_label,'x':time,'y':sine}] 
 
@@ -288,7 +310,7 @@ if('sampling' in options_sel):
         
     else:
         max_frequency=max(st.session_state.frequencies_list)
-    added_samp_frequency=st.sidebar.slider("Fs for Resulting Signal", min_value=0.5*max_frequency, max_value=float(5*max_frequency), step=0.5*max_frequency)
+    added_samp_frequency=col1.slider("Fs for Resulting Signal", min_value=0.5*max_frequency, max_value=float(5*max_frequency), step=0.5*max_frequency)
     sampling(added_samp_frequency, time, sum_amplitude)
     
     if 'reconstruct' in options_sel:
@@ -331,15 +353,16 @@ if('sampling' in options_sel):
 
 
 
-added_frequency = st.sidebar.slider('Added Wave Frequency',1, 10, 1, 1)  # freq (Hz)
-added_amplitude=st.sidebar.slider('Added Wave Amplitude',1,10,1,1)
+added_frequency = col2.slider('Added Wave Frequency',1, 10, 1, 1)  # freq (Hz)
+added_amplitude=col2.slider('Added Wave Amplitude',1,10,1,1)
 added_sine=added_amplitude*np.sin(2*np.pi*added_frequency*time)
-added_label=st.sidebar.text_input(label="Wave Name", max_chars=50)
-add_wave_button=st.sidebar.button("Add Wave")
+added_label=col2.text_input(label="Wave Name", max_chars=50)
+add_wave_button=col2.button("Add Wave")
 
 #call the add_signal function when button is clicked
 if(add_wave_button):
-    
+    len(st.session_state.added_signals)
+
     add_signal(added_label,time,added_sine)
     st.session_state.frequencies_list.append(added_frequency)
 
@@ -357,8 +380,8 @@ remove_options.remove('Resulting Signal')
 
 
 if(len(st.session_state.added_signals)>1):
-    remove_wave_selectbox=st.sidebar.selectbox('Remove Wave',remove_options)
-    remove_wave_button=st.sidebar.button('Remove')
+    remove_wave_selectbox=col2.selectbox('Remove Wave',remove_options)
+    remove_wave_button=col2.button('Remove')
     if(remove_wave_button):
         remove_signal(remove_wave_selectbox)
 plt.xlabel('Time'+ r'$\rightarrow$',fontsize=10)
@@ -384,4 +407,7 @@ if(len(st.session_state.added_signals)>1):
         plt.legend(fontsize=8.5, bbox_to_anchor=(1.1, 1.05))
 else:
     plt.close()
-st.pyplot(fig)
+if uploaded_file is not None:
+    pass
+else:
+    st.pyplot(fig)
