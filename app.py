@@ -6,15 +6,23 @@ import numpy as np
 
 import pandas as pd
 
+global df
+global noise_checkbox
+global sampling_checkbox
+global reconstruction_checkbox
+global sampling_freq
+global snr_db
+global options
+
 uploaded_file = st.file_uploader(label="", type=['csv', 'xlsx'])
 if uploaded_file is not None:
     
-    options=st.sidebar.multiselect(label='select csv optins ',options=['sampling','noise','reconstruct'])
+    options=st.sidebar.multiselect(label='CSV Options ',options=['sampling','noise','reconstruct'])
     # noise_checkbox=st.sidebar.checkbox("Add noise",value=False)
     
-    snr_db=st.sidebar.slider("SNR level",value=15,min_value=0,max_value=120,step=5)
+    snr_db=st.sidebar.slider("SNR",value=15,min_value=0,max_value=120,step=5)
     # sampling_checkbox=st.sidebar.checkbox("sampling",value=False)
-    sampling_freq=st.sidebar.slider(label="Sampling frequency",min_value=1,max_value=10,value=5)
+    sampling_freq=st.sidebar.slider(label="Sampling Frequency",min_value=1,max_value=10,value=5)
     # reconstruction_checkbox=st.sidebar.checkbox("reconstruction",value=False)
     try:
         df = pd.read_csv(uploaded_file)
@@ -23,11 +31,6 @@ if uploaded_file is not None:
     except Exception as e:
         df = pd.read_excel(uploaded_file)
 
-
-
-            
-
-# st.markdown("<style> ul {display: none;} </style>", unsafe_allow_html=True)
 
 def interactive_plot(dataframe):
     amplitude = df['amplitude'].tolist()
@@ -45,9 +48,11 @@ def interactive_plot(dataframe):
 
     #resulting signal with noise
     noise_signal=df['amplitude']+noise
+    dataframe_noise=pd.DataFrame({"time": time, "amplitude": noise_signal})
+
     if('noise' in options):
         fig, ax= plt.subplots()
-        ax.plot(time, noise_signal,color='r' ,label="original signal")
+        ax.plot(time, noise_signal,color='r' ,label="Original Signal")
         fig.legend()
         ax.set_facecolor("#F3F3E2")
         plt.grid(True)
@@ -55,14 +60,13 @@ def interactive_plot(dataframe):
         plt.ylabel("amplitude")
         plt.xlim([0, 1])
         plt.ylim([-1, 1])
-        dataframe_noise=pd.DataFrame({"time": time, "amplitude":noise_signal})
         if 'sampling' in options:
-            sampling(dataframe_noise)
+            pass
         else:    
             st.pyplot(fig)
     else:
         fig, ax= plt.subplots()
-        ax.plot(time, amplitude,color='r' ,label="original signal")
+        ax.plot(time, amplitude,color='r' ,label="Original Signal")
         fig.legend()
         plt.grid(True)
         ax.set_facecolor("#F3F3E2")
@@ -91,7 +95,7 @@ def interactive_plot(dataframe):
         sampling_points=pd.DataFrame({"time": sampling_time, "amplitude": sampling_amplitude})
 
         # plt.scatter(sampling_points.x, sampling_points.y)
-        ax.stem(sampling_time, sampling_amplitude,'b',linefmt='b',basefmt=" ",label="sampling points")
+        ax.stem(sampling_time, sampling_amplitude,'b',linefmt='b',basefmt=" ",label="Sampling Points")
         fig.legend()
         if 'reconstruct' in options:
             pass
@@ -100,7 +104,11 @@ def interactive_plot(dataframe):
         return sampling_points
 
     if('sampling' in options):
-        sampling(df)
+        if ('noise' in options):
+          sampling(dataframe_noise)
+        else:
+          sampling(df)
+
 
     def sinc_interpolation(signal, sample):
       time = signal.iloc[:, 0]
@@ -110,9 +118,9 @@ def interactive_plot(dataframe):
       sincM=np.tile(time, (len(sampled_time), 1))-np.tile(sampled_time[:,np.newaxis],(1, len(time)))
       yNew=np.dot(sampled_amplitude, np.sinc(sincM/T))
       fig, ax= plt.subplots()
-      plt.plot(time, yNew,color='k' ,label="Reconstructed signal")
-      ax.stem(sampled_time, sampled_amplitude,'b',linefmt='b',basefmt="b",label="sampling points")
-      ax.plot(time, amplitude,color='r' ,label="original signal")
+      plt.plot(time, yNew,color='k' ,label="Reconstructed Signal")
+      ax.stem(sampled_time, sampled_amplitude,'b',linefmt='b',basefmt="b",label="Sampling Points")
+      ax.plot(time, amplitude,color='r' ,label="Original Signal")
       fig.legend()
       ax.set_facecolor("#F3F3E2")
       plt.grid(True)
@@ -151,17 +159,20 @@ st.markdown(
 """,
     unsafe_allow_html=True,
 )
-options_sel=st.sidebar.multiselect(label="sin options",options=['sampling','noise','reconstruct'])
+options_sel=st.sidebar.multiselect(label="Composer Options",options=['sampling','noise','reconstruct'])
 # noise_checkbox=st.sidebar.checkbox("Add noise..",value=False) 
 # sampling_checkbox=st.sidebar.checkbox("Sampling", value=False)
 # reconstruct_checkbox=st.sidebar.checkbox("reconstruct Sampling Signal", value=False)
+def update_slider():
+    st.write("freq: ",st.session_state.frequency)
+    st.write("amp: ", st.session_state.amplitude)
 
-frequency = st.sidebar.slider('frequency',1, 10, 1, 1)  # freq (Hz)
-amplitude=st.sidebar.slider('amplitude',1,10,1,1)
-snr_db=st.sidebar.slider("SNR level",value=20,min_value=0,max_value=120,step=5)
+frequency = st.sidebar.slider('Frequency',key="frequency", value=1, max_value=10, min_value=1, step=1, on_change=update_slider)  # freq (Hz)
+amplitude=st.sidebar.slider('Amplitude',key="amplitude", value=1, max_value=10, min_value=1, step=1, on_change=update_slider)
+snr_db=st.sidebar.slider("SNR",value=20,min_value=0,max_value=120,step=5)
 
 time= np.linspace(0, 3, 1200) #time steps
-sine = amplitude * np.sin(2 * np.pi * frequency* time) # sine wave 
+sine = st.session_state.amplitude * np.sin(2 * np.pi * st.session_state.frequency* time) # sine wave 
 #show snr slider when noise checkbox is true
 
 samp_freq=st.sidebar.slider("Sampling Frequency",min_value=1,max_value=100,value=20)
@@ -179,7 +190,8 @@ noise_signal=sine+noise
 if 'added_signals' not in st.session_state:
     st.session_state['added_signals'] = []
     st.session_state.frequencies_list=[]
-    signal_label="total"
+ 
+    signal_label="Resulting Signal"
     st.session_state.added_signals = [{'name':signal_label,'x':time,'y':sine}] 
 
     
@@ -218,7 +230,7 @@ def sinc_interp(nt_array, sampled_amplitude , time):
     plt.title("Sampled Wave")
     plt.xticks(fontsize=40)
     plt.yticks(fontsize=40)
-    plt.plot(time,yNew,'r-',label='Reconstructed wave')
+    plt.plot(time,yNew,'r-',label='Reconstructed Signal')
     plt.legend(fontsize=40,loc='upper right')
     
 def sampling(fsample,t,sin):
@@ -266,13 +278,13 @@ for index in range(len(y0)):
     sum_amplitude.append(sum)
 #execute sampling function if sampling checkbox is true
 if('sampling' in options_sel):
-    signal_label="sampled points"
+    signal_label="Sampling Points"
     if(len(st.session_state.frequencies_list)==0):
         max_frequency=frequency
         
     else:
         max_frequency=max(st.session_state.frequencies_list)
-    added_samp_frequency=st.sidebar.slider("Sampling frequency for resulting signsl", min_value=0.5*max_frequency, max_value=float(5*max_frequency), step=0.5*max_frequency)
+    added_samp_frequency=st.sidebar.slider("Fs for Resulting Signal", min_value=0.5*max_frequency, max_value=float(5*max_frequency), step=0.5*max_frequency)
     sampling(added_samp_frequency, time, sum_amplitude)
     
     if 'reconstruct' in options_sel:
@@ -315,14 +327,15 @@ if('sampling' in options_sel):
 
 
 
-added_frequency = st.sidebar.slider('frequency for added wave',1, 10, 1, 1)  # freq (Hz)
-added_amplitude=st.sidebar.slider('amplitude for added wave',1,10,1,1)
+added_frequency = st.sidebar.slider('Added Wave Frequency',1, 10, 1, 1)  # freq (Hz)
+added_amplitude=st.sidebar.slider('Added Wave Amplitude',1,10,1,1)
 added_sine=added_amplitude*np.sin(2*np.pi*added_frequency*time)
-added_label=st.sidebar.text_input(label="enter wave name", max_chars=50)
+added_label=st.sidebar.text_input(label="Wave Name", max_chars=50)
 add_wave_button=st.sidebar.button("Add Wave")
 
 #call the add_signal function when button is clicked
 if(add_wave_button):
+    
     add_signal(added_label,time,added_sine)
     st.session_state.frequencies_list.append(added_frequency)
 
@@ -336,7 +349,7 @@ remove_options=[]
 
 for dict in added_signals_list:
     remove_options.append(dict['name'])
-remove_options.remove('total')
+remove_options.remove('Resulting Signal')
 
 
 if(len(st.session_state.added_signals)>1):
