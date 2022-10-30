@@ -4,26 +4,30 @@ from streamlit_option_menu import option_menu
 import matplotlib.pyplot as plt 
 import numpy as np
 # css-hxt7ib e1fqkh3o4
-st.markdown("""
-  <style>
-    .css-hvrj08 e1tzin5v3{
-      margin-top: -75px;
-    }
-  </style>
-""", unsafe_allow_html=True)
+st.set_page_config(
+    layout='wide',
+ 
+)
 import pandas as pd
 st.markdown("""
         <style>
+                
+                .css-1q6lfs0 eczokvf0, .withScreencast  {
+                    padding-top: 0rem;
+                    padding-bottom: 0rem;
+                    padding-left: 5rem;
+                    padding-right: 5rem;
+                }
                .css-18e3th9 {
                     padding-top: 0rem;
-                    padding-bottom: 10rem;
+                    padding-bottom: 0rem;
                     padding-left: 5rem;
                     padding-right: 5rem;
                 }
                .css-1d391kg {
                     padding-top: 3.5rem;
                     padding-right: 1rem;
-                    padding-bottom: 3.5rem;
+                    padding-bottom: 3rem;
                     padding-left: 1rem;
                 }
         </style>
@@ -34,15 +38,15 @@ global snr_db
 global options
 col1,col3,col2 = st.sidebar.columns((125,1,125))
 uploaded_file = st.file_uploader(label="", type=['csv', 'xlsx'])
+
 if uploaded_file is not None:
-    
+        
     options=col1.multiselect(label='CSV Options ',options=['sampling','noise','reconstruct'])
     # noise_checkbox=st.sidebar.checkbox("Add noise",value=False)
     
     snr_db=col1.slider("SNR",value=15,min_value=0,max_value=120,step=5)
     # sampling_checkbox=st.sidebar.checkbox("sampling",value=False)
     sampling_freq=col1.slider(label="Sampling Frequency",min_value=1,max_value=10,value=5)
-    # reconstruction_checkbox=st.sidebar.checkbox("reconstruction",value=False)
     try:
         df = pd.read_csv(uploaded_file)
         
@@ -54,7 +58,6 @@ if uploaded_file is not None:
 def interactive_plot(df):
     amplitude = df['amplitude'].tolist()
     time = df['time'].tolist()
-    # col = st.sidebar.color_picker('Select a plot color','#0827F5')
 
     power=df['amplitude']**2
     signal_average_power=np.mean(power)
@@ -69,33 +72,29 @@ def interactive_plot(df):
     dataframe_noise=pd.DataFrame({"time": time, "amplitude": noise_signal})
 
     if('noise' in options):
-        fig, ax= plt.subplots()
-        ax.plot(time, noise_signal,color='r' ,label="Original Signal")
-        fig.legend()
+        fig, ax= plt.subplots(figsize=(8,4))
+        ax.plot(time, noise_signal,color='gray' ,label="Original Signal")
+        fig.legend(fontsize=8.5, bbox_to_anchor=(0.9, 0.9))
         # ax.set_facecolor("#F3F3E2")
         plt.grid(True)
         plt.xlabel("Time")
         plt.ylabel("amplitude")
         plt.xlim([0, 1])
         plt.ylim([-1, 1])
-        if 'sampling' in options:
-            pass
-        else:    
+        if 'sampling' not in options:
             st.pyplot(fig)
     else:
-        fig, ax= plt.subplots()
-        ax.plot(time, amplitude,color='r' ,label="Original Signal")
-        fig.legend()
+        fig, ax= plt.subplots(figsize=(8,4))
+        ax.plot(time, amplitude,color='gray' ,label="Original Signal")
+        fig.legend(fontsize=8.5, bbox_to_anchor=(0.9, 0.9))
         plt.grid(True)
         # ax.set_facecolor("#F3F3E2")
         plt.xlabel("Time")
         plt.ylabel("amplitude")
         plt.xlim([0, 1])
         plt.ylim([-1, 1])
-        if 'sampling' in options:
-            pass
-        else:    
-            st.pyplot(fig)  
+        if 'sampling' not in options:
+             st.pyplot(fig)  
     def sampling(dataframe): 
         frequency=sampling_freq
         period=1/frequency
@@ -113,12 +112,11 @@ def interactive_plot(df):
         sampling_points=pd.DataFrame({"time": sampling_time, "amplitude": sampling_amplitude})
 
         # plt.scatter(sampling_points.x, sampling_points.y)
-        ax.stem(sampling_time, sampling_amplitude,'b',linefmt='b',basefmt=" ",label="Sampling Points")
-        fig.legend()
-        if 'reconstruct' in options:
-            pass
-        else:    
+        ax.stem(sampling_time, sampling_amplitude,'k',linefmt='k',basefmt=" ",label="Sampling Points")
+        fig.legend(fontsize=8.5, bbox_to_anchor=(0.9, 0.9))
+        if 'reconstruct' not in options:
             st.pyplot(fig)
+
         return sampling_points
 
     if('sampling' in options):
@@ -135,14 +133,14 @@ def interactive_plot(df):
       T=(sampled_time[1]-sampled_time[0])
       sincM=np.tile(time, (len(sampled_time), 1))-np.tile(sampled_time[:,np.newaxis],(1, len(time)))
       yNew=np.dot(sampled_amplitude, np.sinc(sincM/T))
-      fig, ax= plt.subplots()
-      plt.plot(time, yNew,color='k' ,label="Reconstructed Signal")
-      ax.stem(sampled_time, sampled_amplitude,'b',linefmt='b',basefmt="b",label="Sampling Points")
+      fig, ax= plt.subplots(figsize=(8,4))
+      plt.plot(time, yNew,color='orange' ,label="Reconstructed Signal")
+      ax.stem(sampled_time, sampled_amplitude,'k',linefmt='k',basefmt="k",label="Sampling Points")
       if('noise' in options):
-         ax.plot(time, noise_signal,color='r' ,label="Original Signal")
+         ax.plot(time, noise_signal,color='gray' ,label="Original Signal")
       if('noise' not in options):
-        ax.plot(time, amplitude,color='r' ,label="Original Signal")
-      fig.legend()
+        ax.plot(time, amplitude,color='gray' ,label="Original Signal")
+      fig.legend(fontsize=8.5,bbox_to_anchor=(1.1, 1.05))
     #   ax.set_facecolor("#F3F3E2")
       plt.grid(True)
       plt.title("Signals",fontsize=10)
@@ -170,25 +168,15 @@ except Exception as e:
 
     
     
+
 #wave variables
-st.markdown(
-    """
-<style>
-.sidebar .sidebar-content {
-    background-image: linear-gradient(#2e7bcf,#2e7bcf);
-    color: ""#FF4B4B";
-}
-</style>
-""",
-    unsafe_allow_html=True,
-)
+
 options_sel=col1.multiselect(label="Composer Options",options=['sampling','noise','reconstruct'])
 
 def update_slider():
     if(len(st.session_state.added_signals)==1):
         (st.session_state.added_signals[0])['y']=st.session_state.amplitude * np.sin(2 * np.pi * st.session_state.frequency* time)
-    else:
-        pass
+
 
 frequency = col1.slider('Frequency',key="frequency", value=1, max_value=10, min_value=1, step=1, on_change=update_slider)  # freq (Hz)
 if uploaded_file is not None:
@@ -214,20 +202,9 @@ noise_signal=sine+noise
 if 'added_signals' not in st.session_state:
     st.session_state['added_signals'] = []
     st.session_state.frequencies_list=[]
-    
-    
-    signal_label="Resulting Signal"
+    signal_label="First Signal"
     st.session_state.added_signals = [{'name':signal_label,'x':time,'y':sine}] 
 
-    
-st.markdown("""
-<style>
-.css-12gp8ed.eknhn3m4
-{
-visibility:hidden;
-}
-</style>
-""",unsafe_allow_html=True)
 
 # st.write('''### Sine Wave''')
 
@@ -266,10 +243,6 @@ def sampling(fsample,t,sin):
     return samp_time,samp_amp
 
 # fsample = st.slider('Fs', 1,20)
-#helper function
-def cm_to_inch(value):
-    return value/2.54
-
 #change plot size
 fig=plt.figure()
 fig.set_figwidth(40)
@@ -289,18 +262,60 @@ plt.axvline(x=0, color='k')
 signal_label=""
 
  
+
+    
+#execute adding wave function if adding wave checkbox is true 
+
+
+
+added_frequency = col2.slider('Added Wave Frequency',1, 10, 1, 1)  # freq (Hz)
+added_amplitude=col2.slider('Added Wave Amplitude',1,10,1,1)
+added_sine=added_amplitude*np.sin(2*np.pi*added_frequency*time)
+added_label=col2.text_input(label="Wave Name", max_chars=50)
+add_wave_button=col2.button("Add Wave")
+
+#call the add_signal function when button is clicked
+if(add_wave_button):
+    add_signal(added_label,time,added_sine)
+    st.session_state.frequencies_list.append(added_frequency)
+    
+
+
+#loop over each item in added_signals and plot them all on the same plot   
+added_signals_list=st.session_state.added_signals
+remove_options=[]
+
+
+for dict in added_signals_list:
+    remove_options.append(dict['name'])
+remove_options.remove('First Signal')
+
+
+if(len(st.session_state.added_signals)>1):
+    remove_wave_selectbox=col2.selectbox('Remove Wave',remove_options)
+    remove_wave_button=col2.button('Remove')
+    if(remove_wave_button):
+        remove_signal(remove_wave_selectbox)
+plt.xlabel('Time'+ r'$\rightarrow$',fontsize=10)
+plt.ylabel('Sin(time) '+ r'$\rightarrow$',fontsize=10)
+plt.grid(True)
+plt.xticks(fontsize=10)
+plt.yticks(fontsize=10)
+plt.axhline(y=0, color='k')
+plt.axvline(x=0, color='k')
+
 sum_amplitude=[]
 y0=(st.session_state.added_signals[0])['y']
 for index in range(len(y0)):
     sum=0
     for dict in st.session_state.added_signals:
         if 'noise' in options_sel:
-            
             sum+=dict['y'][index]+noise[index]
         else:
             sum+=dict['y'][index]
     sum_amplitude.append(sum)
 #execute sampling function if sampling checkbox is true
+
 if('sampling' in options_sel):
     signal_label="Sampling Points"
     if(len(st.session_state.frequencies_list)==0):
@@ -308,14 +323,12 @@ if('sampling' in options_sel):
         
     else:
         max_frequency=max(st.session_state.frequencies_list)
-    added_samp_frequency=col1.slider("Fs for Resulting Signal", min_value=0.5*max_frequency, max_value=float(5*max_frequency), step=0.5*max_frequency)
+    added_samp_frequency=col1.slider("Sampling Frequency", min_value=float(0.5*max_frequency), max_value=float(5*max_frequency), step=float(0.5*max_frequency), value=float(2*max_frequency))
     sampling(added_samp_frequency, time, sum_amplitude)
     
     if 'reconstruct' in options_sel:
         sinc_interp(samp_amp,samp_time,time)
-    else:
-        pass
-        # plt.subplot(4,1,3)
+
         
     plt.title("Sampled Wave",fontsize=10)
     plt.xlabel('Time'+ r'$\rightarrow$',fontsize=10)
@@ -328,7 +341,7 @@ if('sampling' in options_sel):
     # Highlighting axis at x=0 and y=0
     plt.axhline(y=0, color='k')
     plt.axvline(x=0, color='k')
-    ax.stem(samp_time, samp_amp,'b',label=signal_label,linefmt='b',basefmt=" ")
+    ax.stem(samp_time, samp_amp,'k',label=signal_label,linefmt='k',basefmt=" ")
     plt.legend(fontsize=8.5, bbox_to_anchor=(1.1, 1.05))
         
     T=1/added_samp_frequency
@@ -346,55 +359,10 @@ if('sampling' in options_sel):
         sampled_amplitude=amplitude*np.sin(2 * np.pi * max_frequency * nT )
         
 
-    
-#execute adding wave function if adding wave checkbox is true 
-
-
-
-added_frequency = col2.slider('Added Wave Frequency',1, 10, 1, 1)  # freq (Hz)
-added_amplitude=col2.slider('Added Wave Amplitude',1,10,1,1)
-added_sine=added_amplitude*np.sin(2*np.pi*added_frequency*time)
-added_label=col2.text_input(label="Wave Name", max_chars=50)
-add_wave_button=col2.button("Add Wave")
-
-#call the add_signal function when button is clicked
-if(add_wave_button):
-
-    add_signal(added_label,time,added_sine)
-    st.session_state.frequencies_list.append(added_frequency)
-
-
-
-
-#loop over each item in added_signals and plot them all on the same plot   
-added_signals_list=st.session_state.added_signals
-remove_options=[]
-
-
-for dict in added_signals_list:
-    remove_options.append(dict['name'])
-remove_options.remove('Resulting Signal')
-
-
-if(len(st.session_state.added_signals)>1):
-    remove_wave_selectbox=col2.selectbox('Remove Wave',remove_options)
-    remove_wave_button=col2.button('Remove')
-    if(remove_wave_button):
-        remove_signal(remove_wave_selectbox)
-plt.xlabel('Time'+ r'$\rightarrow$',fontsize=10)
-plt.ylabel('Sin(time) '+ r'$\rightarrow$',fontsize=10)
-plt.grid(True)
-plt.xticks(fontsize=10)
-plt.yticks(fontsize=10)
-plt.axhline(y=0, color='k')
-plt.axvline(x=0, color='k')
-
-
 
 sum_amplitude_array=np.array(sum_amplitude)
 ax.plot(time,sum_amplitude,label="Resulting Signal")
 plt.legend(fontsize=8.5, bbox_to_anchor=(1.1, 1.05))
-
 
 
 if(len(st.session_state.added_signals)>1):
@@ -404,7 +372,6 @@ if(len(st.session_state.added_signals)>1):
         plt.legend(fontsize=8.5, bbox_to_anchor=(1.1, 1.05))
 else:
     plt.close()
-if uploaded_file is not None:
-    pass
-else:
+if uploaded_file is  None:
     st.pyplot(fig)
+
