@@ -3,12 +3,36 @@ import streamlit as st
 from streamlit_option_menu import option_menu
 import matplotlib.pyplot as plt 
 import numpy as np
+# css-hxt7ib e1fqkh3o4
+st.markdown("""
+  <style>
+    .css-hvrj08 e1tzin5v3{
+      margin-top: -75px;
+    }
+  </style>
+""", unsafe_allow_html=True)
 import pandas as pd
+st.markdown("""
+        <style>
+               .css-18e3th9 {
+                    padding-top: 0rem;
+                    padding-bottom: 10rem;
+                    padding-left: 5rem;
+                    padding-right: 5rem;
+                }
+               .css-1d391kg {
+                    padding-top: 3.5rem;
+                    padding-right: 1rem;
+                    padding-bottom: 3.5rem;
+                    padding-left: 1rem;
+                }
+        </style>
+        """, unsafe_allow_html=True)
 global df
 global sampling_freq
 global snr_db
 global options
-col1,col2 = st.sidebar.columns((125,125))
+col1,col3,col2 = st.sidebar.columns((125,1,125))
 uploaded_file = st.file_uploader(label="", type=['csv', 'xlsx'])
 if uploaded_file is not None:
     
@@ -164,9 +188,7 @@ def update_slider():
     if(len(st.session_state.added_signals)==1):
         (st.session_state.added_signals[0])['y']=st.session_state.amplitude * np.sin(2 * np.pi * st.session_state.frequency* time)
     else:
-        st.session_state.frequency
-        st.session_state.amplitude
-
+        pass
 
 frequency = col1.slider('Frequency',key="frequency", value=1, max_value=10, min_value=1, step=1, on_change=update_slider)  # freq (Hz)
 if uploaded_file is not None:
@@ -337,7 +359,6 @@ add_wave_button=col2.button("Add Wave")
 
 #call the add_signal function when button is clicked
 if(add_wave_button):
-    len(st.session_state.added_signals)
 
     add_signal(added_label,time,added_sine)
     st.session_state.frequencies_list.append(added_frequency)
