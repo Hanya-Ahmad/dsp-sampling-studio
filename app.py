@@ -168,25 +168,18 @@ except Exception as e:
     print(e)
 
     
-    
-
-#wave variables
+#start of composer code
 
 composer_options=col1.multiselect(label="Composer Options",options=['sampling','noise','reconstruct'])
 
-def update_slider():
-    if(len(st.session_state.added_signals)==1):
-        (st.session_state.added_signals[0])['y']=st.session_state.amplitude * np.sin(2 * np.pi * st.session_state.frequency* time)
 
 
-frequency = col1.slider('Frequency',key="frequency", value=1, max_value=10, min_value=1, step=1, on_change=update_slider)  # freq (Hz)
 if uploaded_file is not None:
-    amplitude=col2.slider('Amplitude',key="amplitude", value=1, max_value=10, min_value=1, step=1, on_change=update_slider)
+    pass
 else:
-    amplitude=col1.slider('Amplitude',key="amplitude", value=1, max_value=10, min_value=1, step=1, on_change=update_slider)
     snr_db=col1.slider("SNR",value=20,min_value=0,max_value=120,step=5)
 time= np.linspace(0, 3, 1200) #time steps
-sine = amplitude * np.sin(2 * np.pi * frequency* time) # sine wave 
+sine =  np.sin(2 * np.pi *1* time) # sine wave 
 #show snr slider when noise checkbox is true
 
 
@@ -204,15 +197,17 @@ if 'added_signals' not in st.session_state:
     st.session_state['added_signals'] = []
     st.session_state.frequencies_list=[]
     signal_label="First Signal"
-    st.session_state.added_signals = [{'name':signal_label,'x':time,'y':sine}] 
+  
 
 
 # st.write('''### Sine Wave''')
 
 # function to add a signal
 def add_signal(label,x,y):
-    st.session_state.added_signals.append({'name':label, 'x':x, 'y':y})
     
+   
+    st.session_state.added_signals.append({'name':label, 'x':x, 'y':y})
+   
 
 #function to remove a signal
 def remove_signal(deleted_name):
@@ -250,7 +245,7 @@ fig.set_figwidth(40)
 fig.set_figheight(70)
 #set plot parameters
 fig, ax = plt.subplots(figsize=(8.5, 5))
-plt.title("Sine Wave(s)")
+plt.title("Composer")
 plt.xlabel('Time'+ r'$\rightarrow$',fontsize=10)
 plt.ylabel('Sin(time) '+ r'$\rightarrow$',fontsize=10)
 plt.grid(True)
@@ -289,7 +284,6 @@ remove_options=[]
 
 for dict in added_signals_list:
     remove_options.append(dict['name'])
-remove_options.remove('First Signal')
 
 
 if(len(st.session_state.added_signals)>1):
@@ -307,24 +301,22 @@ plt.axvline(x=0, color='k')
 
 sum_amplitude=[]
 
-y0=(st.session_state.added_signals[0])['y']
-for index in range(len(y0)):
-    sum=0
-    for dict in st.session_state.added_signals:
-        if 'noise' in composer_options:
-            sum+=dict['y'][index]+noise[index]
-        else:
-            sum+=dict['y'][index]
-    sum_amplitude.append(sum)
-#execute sampling function if sampling checkbox is true
+if(len(st.session_state.added_signals)>0):
+    y0=(st.session_state.added_signals[0])['y']
+    for index in range(len(y0)):
+        sum=0
+        for dict in st.session_state.added_signals:
+            if 'noise' in composer_options:
+                sum+=dict['y'][index]+noise[index]
+            else:
+                sum+=dict['y'][index]
+        sum_amplitude.append(sum)
+    #execute sampling function if sampling checkbox is true
 
 if('sampling' in composer_options):
     signal_label="Sampling Points"
-    if(len(st.session_state.frequencies_list)==0):
-        max_frequency=frequency
-        
-    else:
-        max_frequency=max(st.session_state.frequencies_list)
+ 
+    max_frequency=max(st.session_state.frequencies_list)
     added_samp_frequency=col1.slider("Sampling Frequency", min_value=float(0.5*max_frequency), max_value=float(5*max_frequency), step=float(0.5*max_frequency), value=float(2.5*max_frequency))
     composer_sampling(added_samp_frequency, time, sum_amplitude)
     
@@ -352,18 +344,28 @@ if('sampling' in composer_options):
     nT_array=np.array(nT)
     if('noise' in composer_options):
         # st.write("noise selected")
-        sine_with_noise=amplitude* np.sin(2 * np.pi * max_frequency * nT)
+        sine_with_noise=added_amplitude* np.sin(2 * np.pi * max_frequency * nT)
         noise=np.random.normal(mean_noise,np.sqrt(noise_watts),len(sine_with_noise))
         sampled_amplitude=noise+sine_with_noise
        
 
     else:
-        sampled_amplitude=amplitude*np.sin(2 * np.pi * max_frequency * nT )
+        sampled_amplitude=added_amplitude*np.sin(2 * np.pi * max_frequency * nT )
         
 
 
 sum_amplitude_array=np.array(sum_amplitude)
-ax.plot(time,sum_amplitude,label="Resulting Signal")
+if(len(st.session_state.added_signals)):
+    ax.plot(time,sum_amplitude,label="Summation Signal")
+else:
+    fig, ax= plt.subplots(figsize=(8,4))
+    fig.legend(fontsize=8.5, bbox_to_anchor=(0.9, 0.9))
+    # ax.set_facecolor("#F3F3E2")
+    plt.grid(True)
+    plt.xlabel("Time")
+    plt.ylabel("amplitude")
+    plt.xlim([0, 1])
+    plt.ylim([-1, 1])
 plt.legend(fontsize=8.5, bbox_to_anchor=(1.1, 1.05))
 
 
@@ -376,4 +378,4 @@ else:
     plt.close()
 if uploaded_file is  None:
     st.pyplot(fig)
-
+    
