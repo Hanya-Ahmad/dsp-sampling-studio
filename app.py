@@ -41,11 +41,9 @@ uploaded_file = st.file_uploader(label="", type=['csv', 'xlsx'])
 
 if uploaded_file is not None:
         
-    csv_options=col1.multiselect(label='CSV Options ',options=['sampling','noise','reconstruct'])
-    # noise_checkbox=st.sidebar.checkbox("Add noise",value=False)
-    
+    csv_options=col1.multiselect(label='CSV Options ',options=['Noise','Reconstruct'])    
+    sampling_checkbox=col1.checkbox(label='Sampling ')
     snr_db=col1.slider("SNR",value=15,min_value=0,max_value=120,step=5)
-    # sampling_checkbox=st.sidebar.checkbox("sampling",value=False)
     sampling_freq=col1.slider(label="Sampling Frequency",min_value=1,max_value=10,value=5)
     try:
         df = pd.read_csv(uploaded_file)
@@ -74,27 +72,25 @@ def csv_plot(df):
     if('noise' in csv_options):
         fig, ax= plt.subplots(figsize=(8,4))
         ax.plot(time, noise_signal,color='gray' ,label="Original Signal")
-        fig.legend(fontsize=8.5, bbox_to_anchor=(0.9, 0.9))
-        # ax.set_facecolor("#F3F3E2")
         plt.grid(True)
         plt.xlabel("Time")
         plt.ylabel("amplitude")
         plt.xlim([0, 1])
         plt.ylim([-1, 1])
-        if 'sampling' not in csv_options:
+        if sampling_checkbox==0:
+            fig.legend(fontsize=8.5, bbox_to_anchor=(0.9, 0.9))
             st.pyplot(fig)
     else:
         fig, ax= plt.subplots(figsize=(8,4))
         ax.plot(time, amplitude,color='gray' ,label="Original Signal")
-        fig.legend(fontsize=8.5, bbox_to_anchor=(0.9, 0.9))
         plt.grid(True)
-        # ax.set_facecolor("#F3F3E2")
         plt.xlabel("Time")
         plt.ylabel("amplitude")
         plt.xlim([0, 1])
         plt.ylim([-1, 1])
-        if 'sampling' not in csv_options:
-             st.pyplot(fig)  
+        if sampling_checkbox==0:
+            fig.legend(fontsize=8.5, bbox_to_anchor=(0.9, 0.9))
+            st.pyplot(fig)  
     def csv_sampling(dataframe): 
         frequency=sampling_freq
         period=1/frequency
@@ -110,8 +106,6 @@ def csv_plot(df):
           sampling_amplitude.append(dataframe.iloc[i, 1])
         global sampling_points
         sampling_points=pd.DataFrame({"time": sampling_time, "amplitude": sampling_amplitude})
-
-        # plt.scatter(sampling_points.x, sampling_points.y)
         ax.stem(sampling_time, sampling_amplitude,'k',linefmt='k',basefmt=" ",label="Sampling Points")
         fig.legend(fontsize=8.5, bbox_to_anchor=(0.9, 0.9))
         if 'reconstruct' not in csv_options:
@@ -119,7 +113,7 @@ def csv_plot(df):
 
         return sampling_points
 
-    if('sampling' in csv_options):
+    if sampling_checkbox:
         if ('noise' in csv_options):
           csv_sampling(dataframe_noise)
         else:
@@ -140,8 +134,7 @@ def csv_plot(df):
          ax.plot(time, noise_signal,color='gray' ,label="Original Signal")
       if('noise' not in csv_options):
         ax.plot(time, amplitude,color='gray' ,label="Original Signal")
-      fig.legend(fontsize=8.5,bbox_to_anchor=(1.1, 1.05))
-    #   ax.set_facecolor("#F3F3E2")
+      fig.legend(fontsize=7.5, bbox_to_anchor=(0.91, 0.94))
       plt.grid(True)
       plt.title("Signals",fontsize=10)
       plt.xlabel("Time")
@@ -170,8 +163,8 @@ except Exception as e:
     
 #start of composer code
 
-composer_options=col1.multiselect(label="Composer Options",options=['sampling','noise','reconstruct'])
-
+composer_options=col1.multiselect(label="signal Options",options=['Noise','Reconstruct'])
+sampling_check=col1.checkbox(label="Sampling")
 
 
 if uploaded_file is not None:
@@ -200,7 +193,6 @@ if 'added_signals' not in st.session_state:
   
 
 
-# st.write('''### Sine Wave''')
 
 # function to add a signal
 def add_signal(label,x,y):
@@ -216,7 +208,6 @@ def remove_signal(deleted_name):
             del st.session_state.added_signals[i]
             break
 
-#sampling code
 
 def composer_interpolation(nt_array, sampled_amplitude , time):
     if len(nt_array) != len(sampled_amplitude):
@@ -238,9 +229,8 @@ def composer_sampling(fsample,t,sin):
     samp_amp= sin[::samp_rate]
     return samp_time,samp_amp
 
-# fsample = st.slider('Fs', 1,20)
-#change plot size
 fig=plt.figure()
+#change plot size
 fig.set_figwidth(40)
 fig.set_figheight(70)
 #set plot parameters
@@ -267,7 +257,7 @@ signal_label=""
 added_frequency = col2.slider('Added Wave Frequency',1, 10, 1, 1)  # freq (Hz)
 added_amplitude=col2.slider('Added Wave Amplitude',1,10,1,1)
 added_sine=added_amplitude*np.sin(2*np.pi*added_frequency*time)
-added_label=col2.text_input(label="Wave Name", max_chars=50)
+added_label=col2.text_input(label="Wave Name",value="default signal" ,max_chars=50)
 add_wave_button=col2.button("Add Wave")
 
 #call the add_signal function when button is clicked
@@ -312,46 +302,48 @@ if(len(st.session_state.added_signals)>0):
                 sum+=dict['y'][index]
         sum_amplitude.append(sum)
     #execute sampling function if sampling checkbox is true
-
-if('sampling' in composer_options):
+if (len(st.session_state.added_signals)==0):
     signal_label="Sampling Points"
- 
+    max_frequency=5
+    added_samp_frequency=col1.slider("Sampling Frequency", min_value=float(0.5*max_frequency), max_value=float(5*max_frequency), step=float(0.5*max_frequency), value=float(2.5*max_frequency))
+    composer_sampling(added_samp_frequency, time, sum_amplitude)
+if (len(st.session_state.added_signals)>0):
+    signal_label="Sampling Points"
     max_frequency=max(st.session_state.frequencies_list)
     added_samp_frequency=col1.slider("Sampling Frequency", min_value=float(0.5*max_frequency), max_value=float(5*max_frequency), step=float(0.5*max_frequency), value=float(2.5*max_frequency))
     composer_sampling(added_samp_frequency, time, sum_amplitude)
-    
-    if 'reconstruct' in composer_options:
-        composer_interpolation(samp_amp,samp_time,time)
 
+    if sampling_check:
+        plt.title("Sampled Wave",fontsize=10)
+        plt.xlabel('Time'+ r'$\rightarrow$',fontsize=10)
+        #Setting y axis label for the plot
+        plt.ylabel('Sin(time) '+ r'$\rightarrow$',fontsize=10)
+            # Showing grid
+        plt.grid(True)
+        plt.xticks(fontsize=10)
+        plt.yticks(fontsize=10)
+        # Highlighting axis at x=0 and y=0
+        plt.axhline(y=0, color='k')
+        plt.axvline(x=0, color='k')
+        ax.stem(samp_time, samp_amp,'k',label=signal_label,linefmt='k',basefmt=" ")
+        plt.legend(fontsize=8.5, bbox_to_anchor=(1.1, 4))
+            
+        T=1/added_samp_frequency
+        n=np.arange(0,3/T)
+        nT=n*T
+        nT_array=np.array(nT)
+        if 'reconstruct' in composer_options:
+             composer_interpolation(samp_amp,samp_time,time)
         
-    plt.title("Sampled Wave",fontsize=10)
-    plt.xlabel('Time'+ r'$\rightarrow$',fontsize=10)
-#Setting y axis label for the plot
-    plt.ylabel('Sin(time) '+ r'$\rightarrow$',fontsize=10)
-        # Showing grid
-    plt.grid(True)
-    plt.xticks(fontsize=10)
-    plt.yticks(fontsize=10)
-    # Highlighting axis at x=0 and y=0
-    plt.axhline(y=0, color='k')
-    plt.axvline(x=0, color='k')
-    ax.stem(samp_time, samp_amp,'k',label=signal_label,linefmt='k',basefmt=" ")
-    plt.legend(fontsize=8.5, bbox_to_anchor=(1.1, 1.05))
-        
-    T=1/added_samp_frequency
-    n=np.arange(0,3/T)
-    nT=n*T
-    nT_array=np.array(nT)
-    if('noise' in composer_options):
-        # st.write("noise selected")
-        sine_with_noise=added_amplitude* np.sin(2 * np.pi * max_frequency * nT)
-        noise=np.random.normal(mean_noise,np.sqrt(noise_watts),len(sine_with_noise))
-        sampled_amplitude=noise+sine_with_noise
-       
+        if('noise' in composer_options):
+            sine_with_noise=added_amplitude* np.sin(2 * np.pi * max_frequency * nT)
+            noise=np.random.normal(mean_noise,np.sqrt(noise_watts),len(sine_with_noise))
+            sampled_amplitude=noise+sine_with_noise
+            
 
-    else:
-        sampled_amplitude=added_amplitude*np.sin(2 * np.pi * max_frequency * nT )
-        
+        else:
+            sampled_amplitude=added_amplitude*np.sin(2 * np.pi * max_frequency * nT )
+            
 
 
 sum_amplitude_array=np.array(sum_amplitude)
@@ -359,14 +351,14 @@ if(len(st.session_state.added_signals)):
     ax.plot(time,sum_amplitude,label="Summation Signal")
 else:
     fig, ax= plt.subplots(figsize=(8,4))
-    fig.legend(fontsize=8.5, bbox_to_anchor=(0.9, 0.9))
-    # ax.set_facecolor("#F3F3E2")
+    # plt.legend(fontsize=8.5, bbox_to_anchor=(1.1, 1.05))
     plt.grid(True)
     plt.xlabel("Time")
     plt.ylabel("amplitude")
     plt.xlim([0, 1])
     plt.ylim([-1, 1])
-plt.legend(fontsize=8.5, bbox_to_anchor=(1.1, 1.05))
+if(len(st.session_state.added_signals)>0):
+    plt.legend(fontsize=8.5, bbox_to_anchor=(1.1, 1.05))
 
 
 if(len(st.session_state.added_signals)>1):
@@ -376,6 +368,5 @@ if(len(st.session_state.added_signals)>1):
         plt.legend(fontsize=8.5, bbox_to_anchor=(1.1, 1.05))
 else:
     plt.close()
-if uploaded_file is  None:
+if uploaded_file is None:
     st.pyplot(fig)
-    
