@@ -40,9 +40,10 @@ col1,col3,col2 = st.sidebar.columns((125,1,125))
 uploaded_file = st.file_uploader(label="", type=['csv', 'xlsx'])
 
 if uploaded_file is not None:
-        
-    csv_options=col1.multiselect(label='CSV Options ',options=['Noise','Reconstruct'])    
-    sampling_checkbox=col1.checkbox(label='Sampling ')
+    noise_checkbox=col1.checkbox(label='noise')
+    sampling_checkbox=col1.checkbox(label='sampling')
+    reconstruct_checkbox=col1.checkbox(label='reconstruction')
+    
     snr_db=col1.slider("SNR",value=15,min_value=0,max_value=120,step=5)
     sampling_freq=col1.slider(label="Sampling Frequency",min_value=1,max_value=10,value=5)
     try:
@@ -69,7 +70,7 @@ def csv_plot(df):
     noise_signal=df['amplitude']+noise
     dataframe_noise=pd.DataFrame({"time": time, "amplitude": noise_signal})
 
-    if('noise' in csv_options):
+    if noise_checkbox:
         fig, ax= plt.subplots(figsize=(8,4))
         ax.plot(time, noise_signal,color='gray' ,label="Original Signal")
         plt.grid(True)
@@ -108,13 +109,13 @@ def csv_plot(df):
         sampling_points=pd.DataFrame({"time": sampling_time, "amplitude": sampling_amplitude})
         ax.stem(sampling_time, sampling_amplitude,'k',linefmt='k',basefmt=" ",label="Sampling Points")
         fig.legend(fontsize=8.5, bbox_to_anchor=(0.9, 0.9))
-        if 'reconstruct' not in csv_options:
+        if reconstruct_checkbox==0:
             st.pyplot(fig)
 
         return sampling_points
 
     if sampling_checkbox:
-        if ('noise' in csv_options):
+        if noise_checkbox:
           csv_sampling(dataframe_noise)
         else:
           csv_sampling(df)
@@ -130,9 +131,9 @@ def csv_plot(df):
       fig, ax= plt.subplots(figsize=(8,4))
       plt.plot(time, yNew,color='orange' ,label="Reconstructed Signal")
       ax.stem(sampled_time, sampled_amplitude,'k',linefmt='k',basefmt="k",label="Sampling Points")
-      if('noise' in csv_options):
+      if noise_checkbox:
          ax.plot(time, noise_signal,color='gray' ,label="Original Signal")
-      if('noise' not in csv_options):
+      else:
         ax.plot(time, amplitude,color='gray' ,label="Original Signal")
       fig.legend(fontsize=7.5, bbox_to_anchor=(0.91, 0.94))
       plt.grid(True)
@@ -144,12 +145,12 @@ def csv_plot(df):
 
       st.pyplot(fig)
 
-    if(('reconstruct' in csv_options)
-     and ('noise' not in csv_options )):
-        csv_interpolation(df,sampling_points)
-      
-    elif(('reconstruct' in csv_options)and ('noise'  in csv_options)):
-             csv_interpolation(dataframe_noise,sampling_points)
+    if reconstruct_checkbox:
+      if noise_checkbox:
+           csv_interpolation(dataframe_noise,sampling_points)
+      else:
+          csv_interpolation(df,sampling_points)
+
 
      
     
@@ -163,8 +164,9 @@ except Exception as e:
     
 #start of composer code
 
-composer_options=col1.multiselect(label="signal Options",options=['Noise','Reconstruct'])
+nosie_check=col1.checkbox(label="Noise")
 sampling_check=col1.checkbox(label="Sampling")
+reconstruct_check=col1.checkbox(label="Reconstruction")
 
 
 if uploaded_file is not None:
@@ -296,7 +298,7 @@ if(len(st.session_state.added_signals)>0):
     for index in range(len(y0)):
         sum=0
         for dict in st.session_state.added_signals:
-            if 'noise' in composer_options:
+            if nosie_check:
                 sum+=dict['y'][index]+noise[index]
             else:
                 sum+=dict['y'][index]
@@ -325,17 +327,17 @@ if (len(st.session_state.added_signals)>0):
         # Highlighting axis at x=0 and y=0
         plt.axhline(y=0, color='k')
         plt.axvline(x=0, color='k')
-        ax.stem(samp_time, samp_amp,'k',label=signal_label,linefmt='k',basefmt=" ")
+        ax.stem(samp_time, samp_amp,'k',label="Sampling points",linefmt='k',basefmt=" ")
         plt.legend(fontsize=8.5, bbox_to_anchor=(1.1, 4))
             
         T=1/added_samp_frequency
         n=np.arange(0,3/T)
         nT=n*T
         nT_array=np.array(nT)
-        if 'reconstruct' in composer_options:
+        if reconstruct_check:
              composer_interpolation(samp_amp,samp_time,time)
         
-        if('noise' in composer_options):
+        if nosie_check:
             sine_with_noise=added_amplitude* np.sin(2 * np.pi * max_frequency * nT)
             noise=np.random.normal(mean_noise,np.sqrt(noise_watts),len(sine_with_noise))
             sampled_amplitude=noise+sine_with_noise
