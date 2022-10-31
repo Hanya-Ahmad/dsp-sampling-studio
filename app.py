@@ -36,16 +36,16 @@ global df
 global sampling_freq
 global snr_db
 global csv_options
-col1,col3,col2 = st.sidebar.columns((125,1,125))
+sidebar_col1,sidebar_col2 = st.sidebar.columns((125,125))
 uploaded_file = st.file_uploader(label="", type=['csv', 'xlsx'])
 
 if uploaded_file is not None:
-    noise_checkbox=col1.checkbox(label='noise')
-    sampling_checkbox=col1.checkbox(label='sampling')
-    reconstruct_checkbox=col1.checkbox(label='reconstruction')
+    noise_checkbox=sidebar_col1.checkbox(label='noise')
+    sampling_checkbox=sidebar_col1.checkbox(label='sampling')
+    reconstruct_checkbox=sidebar_col1.checkbox(label='reconstruction')
     
-    snr_db=col1.slider("SNR",value=15,min_value=0,max_value=120,step=5)
-    sampling_freq=col1.slider(label="Sampling Frequency",min_value=1,max_value=10,value=5)
+    snr_db=sidebar_col1.slider("SNR",value=15,min_value=0,max_value=120,step=5)
+    sampling_freq=sidebar_col1.slider(label="Sampling Frequency",min_value=1,max_value=10,value=5)
     try:
         df = pd.read_csv(uploaded_file)
         
@@ -164,15 +164,15 @@ except Exception as e:
     
 #start of composer code
 
-nosie_check=col1.checkbox(label="Noise")
-sampling_check=col1.checkbox(label="Sampling")
-reconstruct_check=col1.checkbox(label="Reconstruction")
+nosie_check=sidebar_col1.checkbox(label="Noise")
+sampling_check=sidebar_col1.checkbox(label="Sampling")
+reconstruct_check=sidebar_col1.checkbox(label="Reconstruction")
 
 
 if uploaded_file is not None:
     pass
 else:
-    snr_db=col1.slider("SNR",value=20,min_value=0,max_value=120,step=5)
+    snr_db=sidebar_col1.slider("SNR",value=20,min_value=0,max_value=120,step=5)
 time= np.linspace(0, 3, 1200) #time steps
 sine =  np.sin(2 * np.pi *1* time) # sine wave 
 #show snr slider when noise checkbox is true
@@ -256,11 +256,11 @@ signal_label=""
 
 
 
-added_frequency = col2.slider('Added Wave Frequency',1, 10, 1, 1)  # freq (Hz)
-added_amplitude=col2.slider('Added Wave Amplitude',1,10,1,1)
+added_frequency = sidebar_col2.slider('Added Wave Frequency',1, 10, 1, 1)  # freq (Hz)
+added_amplitude=sidebar_col2.slider('Added Wave Amplitude',1,10,1,1)
 added_sine=added_amplitude*np.sin(2*np.pi*added_frequency*time)
-added_label=col2.text_input(label="Wave Name",value="default signal" ,max_chars=50)
-add_wave_button=col2.button("Add Wave")
+added_label=sidebar_col2.text_input(label="Wave Name",value="default signal" ,max_chars=50)
+add_wave_button=sidebar_col2.button("Add Wave")
 
 #call the add_signal function when button is clicked
 if(add_wave_button):
@@ -279,8 +279,8 @@ for dict in added_signals_list:
 
 
 if(len(st.session_state.added_signals)>1):
-    remove_wave_selectbox=col2.selectbox('Remove Wave',remove_options)
-    remove_wave_button=col2.button('Remove')
+    remove_wave_selectbox=sidebar_col2.selectbox('Remove Wave',remove_options)
+    remove_wave_button=sidebar_col2.button('Remove')
     if(remove_wave_button):
         remove_signal(remove_wave_selectbox)
 plt.xlabel('Time'+ r'$\rightarrow$',fontsize=10)
@@ -307,12 +307,12 @@ if(len(st.session_state.added_signals)>0):
 if (len(st.session_state.added_signals)==0):
     signal_label="Sampling Points"
     max_frequency=5
-    added_samp_frequency=col1.slider("Sampling Frequency", min_value=float(0.5*max_frequency), max_value=float(5*max_frequency), step=float(0.5*max_frequency), value=float(2.5*max_frequency))
+    added_samp_frequency=sidebar_col1.slider("Sampling Frequency", min_value=float(0.5*max_frequency), max_value=float(5*max_frequency), step=float(0.5*max_frequency), value=float(2.5*max_frequency))
     composer_sampling(added_samp_frequency, time, sum_amplitude)
 if (len(st.session_state.added_signals)>0):
     signal_label="Sampling Points"
     max_frequency=max(st.session_state.frequencies_list)
-    added_samp_frequency=col1.slider("Sampling Frequency", min_value=float(0.5*max_frequency), max_value=float(5*max_frequency), step=float(0.5*max_frequency), value=float(2.5*max_frequency))
+    added_samp_frequency=sidebar_col1.slider("Sampling Frequency", min_value=float(0.5*max_frequency), max_value=float(5*max_frequency), step=float(0.5*max_frequency), value=float(2.5*max_frequency))
     composer_sampling(added_samp_frequency, time, sum_amplitude)
 
     if sampling_check:
