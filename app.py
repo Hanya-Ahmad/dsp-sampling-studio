@@ -35,13 +35,13 @@ st.markdown("""
 global df
 global sampling_freq
 global snr_db
-global options
+global csv_options
 col1,col3,col2 = st.sidebar.columns((125,1,125))
 uploaded_file = st.file_uploader(label="", type=['csv', 'xlsx'])
 
 if uploaded_file is not None:
         
-    options=col1.multiselect(label='CSV Options ',options=['sampling','noise','reconstruct'])
+    csv_options=col1.multiselect(label='CSV Options ',options=['sampling','noise','reconstruct'])
     # noise_checkbox=st.sidebar.checkbox("Add noise",value=False)
     
     snr_db=col1.slider("SNR",value=15,min_value=0,max_value=120,step=5)
@@ -55,7 +55,7 @@ if uploaded_file is not None:
         df = pd.read_excel(uploaded_file)
 
 
-def interactive_plot(df):
+def csv_plot(df):
     amplitude = df['amplitude'].tolist()
     time = df['time'].tolist()
 
@@ -71,7 +71,7 @@ def interactive_plot(df):
     noise_signal=df['amplitude']+noise
     dataframe_noise=pd.DataFrame({"time": time, "amplitude": noise_signal})
 
-    if('noise' in options):
+    if('noise' in csv_options):
         fig, ax= plt.subplots(figsize=(8,4))
         ax.plot(time, noise_signal,color='gray' ,label="Original Signal")
         fig.legend(fontsize=8.5, bbox_to_anchor=(0.9, 0.9))
@@ -81,7 +81,7 @@ def interactive_plot(df):
         plt.ylabel("amplitude")
         plt.xlim([0, 1])
         plt.ylim([-1, 1])
-        if 'sampling' not in options:
+        if 'sampling' not in csv_options:
             st.pyplot(fig)
     else:
         fig, ax= plt.subplots(figsize=(8,4))
@@ -93,16 +93,16 @@ def interactive_plot(df):
         plt.ylabel("amplitude")
         plt.xlim([0, 1])
         plt.ylim([-1, 1])
-        if 'sampling' not in options:
+        if 'sampling' not in csv_options:
              st.pyplot(fig)  
-    def sampling(dataframe): 
+    def csv_sampling(dataframe): 
         frequency=sampling_freq
         period=1/frequency
         no_cycles=dataframe.iloc[:,0].max()/period
-        freq_sampling=2*frequency
+        nyquist_freq=2*frequency
         no_points=dataframe.shape[0]
         points_per_cycle=no_points/no_cycles
-        step=points_per_cycle/freq_sampling
+        step=points_per_cycle/nyquist_freq
         sampling_time=[]
         sampling_amplitude=[]
         for i in range(int(step/2), int(no_points), int(step)):
@@ -114,19 +114,19 @@ def interactive_plot(df):
         # plt.scatter(sampling_points.x, sampling_points.y)
         ax.stem(sampling_time, sampling_amplitude,'k',linefmt='k',basefmt=" ",label="Sampling Points")
         fig.legend(fontsize=8.5, bbox_to_anchor=(0.9, 0.9))
-        if 'reconstruct' not in options:
+        if 'reconstruct' not in csv_options:
             st.pyplot(fig)
 
         return sampling_points
 
-    if('sampling' in options):
-        if ('noise' in options):
-          sampling(dataframe_noise)
+    if('sampling' in csv_options):
+        if ('noise' in csv_options):
+          csv_sampling(dataframe_noise)
         else:
-          sampling(df)
+          csv_sampling(df)
 
 
-    def sinc_interpolation(signal, sample):
+    def csv_interpolation(signal, sample):
       time = signal.iloc[:, 0]
       sampled_amplitude= sample.iloc[:, 1]
       sampled_time= sample.iloc[:, 0]
@@ -136,9 +136,9 @@ def interactive_plot(df):
       fig, ax= plt.subplots(figsize=(8,4))
       plt.plot(time, yNew,color='orange' ,label="Reconstructed Signal")
       ax.stem(sampled_time, sampled_amplitude,'k',linefmt='k',basefmt="k",label="Sampling Points")
-      if('noise' in options):
+      if('noise' in csv_options):
          ax.plot(time, noise_signal,color='gray' ,label="Original Signal")
-      if('noise' not in options):
+      if('noise' not in csv_options):
         ax.plot(time, amplitude,color='gray' ,label="Original Signal")
       fig.legend(fontsize=8.5,bbox_to_anchor=(1.1, 1.05))
     #   ax.set_facecolor("#F3F3E2")
@@ -151,17 +151,18 @@ def interactive_plot(df):
 
       st.pyplot(fig)
 
-    if(('reconstruct' in options) and ('noise' not in options )):
-        sinc_interpolation(df,sampling_points)
+    if(('reconstruct' in csv_options)
+     and ('noise' not in csv_options )):
+        csv_interpolation(df,sampling_points)
       
-    elif(('reconstruct' in options)and ('noise'  in options)):
-             sinc_interpolation(dataframe_noise,sampling_points)
+    elif(('reconstruct' in csv_options)and ('noise'  in csv_options)):
+             csv_interpolation(dataframe_noise,sampling_points)
 
      
     
 try:
     
-    interactive_plot(df)
+    csv_plot(df)
 
 except Exception as e:
     print(e)
@@ -171,7 +172,7 @@ except Exception as e:
 
 #wave variables
 
-options_sel=col1.multiselect(label="Composer Options",options=['sampling','noise','reconstruct'])
+composer_options=col1.multiselect(label="Composer Options",options=['sampling','noise','reconstruct'])
 
 def update_slider():
     if(len(st.session_state.added_signals)==1):
@@ -222,7 +223,7 @@ def remove_signal(deleted_name):
 
 #sampling code
 
-def sinc_interp(nt_array, sampled_amplitude , time):
+def composer_interpolation(nt_array, sampled_amplitude , time):
     if len(nt_array) != len(sampled_amplitude):
         raise Exception('x and s must be the same length')
     T = (sampled_amplitude[1] - sampled_amplitude[0])
@@ -234,7 +235,7 @@ def sinc_interp(nt_array, sampled_amplitude , time):
     ax.plot(time,yNew,'r-',label='Reconstructed Signal')
     plt.legend(fontsize=8.5,bbox_to_anchor=(1.1, 1.05))
     
-def sampling(fsample,t,sin):
+def composer_sampling(fsample,t,sin):
     time_range=(max(t)-min(t))
     samp_rate=int((len(t)/time_range)/((fsample)))
     global samp_time, samp_amp
@@ -305,29 +306,30 @@ plt.axhline(y=0, color='k')
 plt.axvline(x=0, color='k')
 
 sum_amplitude=[]
+
 y0=(st.session_state.added_signals[0])['y']
 for index in range(len(y0)):
     sum=0
     for dict in st.session_state.added_signals:
-        if 'noise' in options_sel:
+        if 'noise' in composer_options:
             sum+=dict['y'][index]+noise[index]
         else:
             sum+=dict['y'][index]
     sum_amplitude.append(sum)
 #execute sampling function if sampling checkbox is true
 
-if('sampling' in options_sel):
+if('sampling' in composer_options):
     signal_label="Sampling Points"
     if(len(st.session_state.frequencies_list)==0):
         max_frequency=frequency
         
     else:
         max_frequency=max(st.session_state.frequencies_list)
-    added_samp_frequency=col1.slider("Sampling Frequency", min_value=float(0.5*max_frequency), max_value=float(5*max_frequency), step=float(0.5*max_frequency), value=float(2*max_frequency))
-    sampling(added_samp_frequency, time, sum_amplitude)
+    added_samp_frequency=col1.slider("Sampling Frequency", min_value=float(0.5*max_frequency), max_value=float(5*max_frequency), step=float(0.5*max_frequency), value=float(2.5*max_frequency))
+    composer_sampling(added_samp_frequency, time, sum_amplitude)
     
-    if 'reconstruct' in options_sel:
-        sinc_interp(samp_amp,samp_time,time)
+    if 'reconstruct' in composer_options:
+        composer_interpolation(samp_amp,samp_time,time)
 
         
     plt.title("Sampled Wave",fontsize=10)
@@ -348,7 +350,7 @@ if('sampling' in options_sel):
     n=np.arange(0,3/T)
     nT=n*T
     nT_array=np.array(nT)
-    if('noise' in options_sel):
+    if('noise' in composer_options):
         # st.write("noise selected")
         sine_with_noise=amplitude* np.sin(2 * np.pi * max_frequency * nT)
         noise=np.random.normal(mean_noise,np.sqrt(noise_watts),len(sine_with_noise))
