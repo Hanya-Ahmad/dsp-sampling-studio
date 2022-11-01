@@ -9,13 +9,13 @@
 
 ## Project Description:
 ### This project is a real-time sampling studio where users can
-* Compose their own signal by adding multiple sinusoidals 
+* Compose their own signal by adding multiple sinusoidals and the summation signal is plotted automatically
 ![Screenshot (52)](https://user-images.githubusercontent.com/93945902/199188675-595d51af-a134-4844-9f25-18e263983e6b.png)
 *Note: The default wave name is an auto-incremented number*
 
 * Remove one or more of the added signals
 ![removedwave](https://user-images.githubusercontent.com/93945902/199189370-efcf08f3-f33f-4f37-910b-38cd8f4616d9.png)
-*We removed wave "2"* 
+*We removed wave 2* 
 * Control the sampling frequency of the signal to see the effects of undersampling and oversampling (default sampling frequency is the Nyquist frequency)
 ![compreconstruct](https://user-images.githubusercontent.com/93945902/199197845-5337c71f-5d40-4e9c-bcda-3f4682c3f001.png)
 
