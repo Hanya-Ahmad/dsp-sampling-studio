@@ -220,7 +220,12 @@ def composer_interpolation(nt_array, sampled_amplitude , time):
     plt.yticks(fontsize=10)
     
     ax.plot(time,yNew,'r-',label='Reconstructed Signal')
-    ax.legend(fontsize=8.5,bbox_to_anchor=(1.1, 1.05))
+    if(added_frequency>1 ):
+        ax.legend(loc="upper right",fontsize=8.5,bbox_to_anchor=(0.4, 0.8))
+    elif(added_frequency>1 and added_amplitude>1):
+        ax.legend(fontsize=8.5,bbox_to_anchor=(0.4, 0.8),loc="upper right")
+    else:    
+         ax.legend(loc="upper right",fontsize=8.5,bbox_to_anchor=(1.1, 1.05))
     
 def composer_sampling(fsample,t,sin):
     time_range=(max(t)-min(t))
@@ -319,7 +324,7 @@ if(uploaded_file is None):
             plt.axhline(y=0, color='k')
             plt.axvline(x=0, color='k')
             ax.stem(samp_time, samp_amp,'k',label="Sampling points",linefmt='k',basefmt=" ")
-            ax.legend(fontsize=8.5, bbox_to_anchor=(1.1, 4))
+            ax.legend(loc="upper right",fontsize=8.5, bbox_to_anchor=(1.1, 1.05))
                 
             T=1/added_samp_frequency
             n=np.arange(0,3/T)
@@ -351,13 +356,13 @@ if(uploaded_file is None):
         plt.xlim([0, 1])
         plt.ylim([-1, 1])
     if(len(st.session_state.added_signals)>0):
-        ax.legend(fontsize=8.5, bbox_to_anchor=(1.1, 1.05))
+        ax.legend(loc="upper right",fontsize=8.5, bbox_to_anchor=(1.1, 1.05))
 
 
         for i in range (0,len(st.session_state.added_signals)):
             ax.plot(st.session_state.added_signals[i]['x'], st.session_state.added_signals[i]['y'],
             label=st.session_state.added_signals[i]['name'])
-            ax.legend(fontsize=8.5, bbox_to_anchor=(1.1, 1.05))
+            ax.legend(loc="upper right",fontsize=8.5, bbox_to_anchor=(1.1, 1.05))
 
     if uploaded_file is None:
         st.pyplot(fig)
