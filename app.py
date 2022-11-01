@@ -12,7 +12,7 @@ import pandas as pd
 st.markdown("""
         <style>
                 .css-hxt7ib{
-                    margin-top: -90px;
+                    margin-top: -55px;
                     }
                 
                 .css-1q6lfs0 eczokvf0, .withScreencast  {
@@ -143,7 +143,7 @@ def csv_plot(df):
         ax.plot(time, amplitude,color='gray' ,label="Original Signal")
       fig.legend(fontsize=7.5, bbox_to_anchor=(0.91, 0.94))
       plt.grid(True)
-      plt.title("Signals",fontsize=10)
+      plt.title("Uploaded Signal",fontsize=10)
       plt.xlabel("Time")
       plt.ylabel("amplitude")
       plt.xlim([0, 1])
@@ -218,8 +218,9 @@ def composer_interpolation(nt_array, sampled_amplitude , time):
     yNew = np.dot(nt_array, np.sinc(sincM/T))
     plt.xticks(fontsize=10)
     plt.yticks(fontsize=10)
+    
     ax.plot(time,yNew,'r-',label='Reconstructed Signal')
-    plt.legend(fontsize=8.5,bbox_to_anchor=(1.1, 1.05))
+    ax.legend(fontsize=8.5,bbox_to_anchor=(1.1, 1.05))
     
 def composer_sampling(fsample,t,sin):
     time_range=(max(t)-min(t))
@@ -247,8 +248,8 @@ plt.axvline(x=0, color='k')
 if 'default_wave_name' not in st.session_state:
     st.session_state.default_wave_name=1
 
-added_frequency = sidebar_col1.slider('Added Wave Frequency',1, 10, 1, 1)  # freq (Hz)
-added_amplitude=sidebar_col1.slider('Added Wave Amplitude',1,10,1,1)
+added_frequency = sidebar_col1.slider('Frequency',1, 10, 1, 1)  # freq (Hz)
+added_amplitude=sidebar_col1.slider('Amplitude',1,10,1,1)
 added_sine=added_amplitude*np.sin(2*np.pi*added_frequency*time)
 added_label=sidebar_col1.text_input(label="Wave Name",value=str(st.session_state.default_wave_name) ,max_chars=50)
 add_wave_button=sidebar_col1.button("Add Wave")
@@ -285,78 +286,78 @@ plt.axhline(y=0, color='k')
 plt.axvline(x=0, color='k')
 
 sum_amplitude=[]
+if(uploaded_file is None):
+    if(len(st.session_state.added_signals)>0):
+        y0=(st.session_state.added_signals[0])['y']
+        for index in range(len(y0)):
+            sum=0
+            for dict in st.session_state.added_signals:
+                if noise_checkbox:
+                    sum+=dict['y'][index]+noise[index]
+                else:
+                    sum+=dict['y'][index]
+            sum_amplitude.append(sum)
+        #execute sampling function if sampling checkbox is true
 
-if(len(st.session_state.added_signals)>0):
-    y0=(st.session_state.added_signals[0])['y']
-    for index in range(len(y0)):
-        sum=0
-        for dict in st.session_state.added_signals:
+    if (len(st.session_state.added_signals)>0):
+        signal_label="Sampling Points"
+        max_frequency=max(st.session_state.frequencies_list)
+        if(uploaded_file is None):
+            added_samp_frequency=sidebar_col2.slider("Sampling Frequency", min_value=float(0.5*max_frequency), max_value=float(5*max_frequency), step=float(0.5*max_frequency), value=float(2.5*max_frequency))
+            composer_sampling(added_samp_frequency, time, sum_amplitude)
+
+        if sampling_checkbox:
+            
+            plt.xlabel('Time'+ r'$\rightarrow$',fontsize=10)
+            #Setting y axis label for the plot
+            plt.ylabel('Sin(time) '+ r'$\rightarrow$',fontsize=10)
+                # Showing grid
+            plt.grid(True)
+            plt.xticks(fontsize=10)
+            plt.yticks(fontsize=10)
+            # Highlighting axis at x=0 and y=0
+            plt.axhline(y=0, color='k')
+            plt.axvline(x=0, color='k')
+            ax.stem(samp_time, samp_amp,'k',label="Sampling points",linefmt='k',basefmt=" ")
+            ax.legend(fontsize=8.5, bbox_to_anchor=(1.1, 4))
+                
+            T=1/added_samp_frequency
+            n=np.arange(0,3/T)
+            nT=n*T
+            nT_array=np.array(nT)
+            if reconstruct_checkbox:
+                composer_interpolation(samp_amp,samp_time,time)
+            
             if noise_checkbox:
-                sum+=dict['y'][index]+noise[index]
+                sine_with_noise=added_amplitude* np.sin(2 * np.pi * max_frequency * nT)
+                noise=np.random.normal(mean_noise,np.sqrt(noise_watts),len(sine_with_noise))
+                sampled_amplitude=noise+sine_with_noise
+                
+
             else:
-                sum+=dict['y'][index]
-        sum_amplitude.append(sum)
-    #execute sampling function if sampling checkbox is true
+                sampled_amplitude=added_amplitude*np.sin(2 * np.pi * max_frequency * nT )
+                
 
-if (len(st.session_state.added_signals)>0):
-    signal_label="Sampling Points"
-    max_frequency=max(st.session_state.frequencies_list)
-    if(uploaded_file is None):
-        added_samp_frequency=sidebar_col2.slider("Sampling Frequency", min_value=float(0.5*max_frequency), max_value=float(5*max_frequency), step=float(0.5*max_frequency), value=float(2.5*max_frequency))
-    composer_sampling(added_samp_frequency, time, sum_amplitude)
 
-    if sampling_checkbox:
-        
-        plt.xlabel('Time'+ r'$\rightarrow$',fontsize=10)
-        #Setting y axis label for the plot
-        plt.ylabel('Sin(time) '+ r'$\rightarrow$',fontsize=10)
-            # Showing grid
+    sum_amplitude_array=np.array(sum_amplitude)
+    if(len(st.session_state.added_signals)):
+        ax.plot(time,sum_amplitude,label="Summation Signal")
+    else:
+        fig, ax= plt.subplots(figsize=(8,4))
+        # ax.legend(fontsize=8.5, bbox_to_anchor=(1.1, 1.05))
         plt.grid(True)
-        plt.xticks(fontsize=10)
-        plt.yticks(fontsize=10)
-        # Highlighting axis at x=0 and y=0
-        plt.axhline(y=0, color='k')
-        plt.axvline(x=0, color='k')
-        ax.stem(samp_time, samp_amp,'k',label="Sampling points",linefmt='k',basefmt=" ")
-        plt.legend(fontsize=8.5, bbox_to_anchor=(1.1, 4))
-            
-        T=1/added_samp_frequency
-        n=np.arange(0,3/T)
-        nT=n*T
-        nT_array=np.array(nT)
-        if reconstruct_checkbox:
-             composer_interpolation(samp_amp,samp_time,time)
-        
-        if noise_checkbox:
-            sine_with_noise=added_amplitude* np.sin(2 * np.pi * max_frequency * nT)
-            noise=np.random.normal(mean_noise,np.sqrt(noise_watts),len(sine_with_noise))
-            sampled_amplitude=noise+sine_with_noise
-            
-
-        else:
-            sampled_amplitude=added_amplitude*np.sin(2 * np.pi * max_frequency * nT )
-            
+        plt.xlabel("Time")
+        plt.ylabel("amplitude")
+        plt.xlim([0, 1])
+        plt.ylim([-1, 1])
+    if(len(st.session_state.added_signals)>0):
+        ax.legend(fontsize=8.5, bbox_to_anchor=(1.1, 1.05))
 
 
-sum_amplitude_array=np.array(sum_amplitude)
-if(len(st.session_state.added_signals)):
-    ax.plot(time,sum_amplitude,label="Summation Signal")
-else:
-    fig, ax= plt.subplots(figsize=(8,4))
-    # plt.legend(fontsize=8.5, bbox_to_anchor=(1.1, 1.05))
-    plt.grid(True)
-    plt.xlabel("Time")
-    plt.ylabel("amplitude")
-    plt.xlim([0, 1])
-    plt.ylim([-1, 1])
-if(len(st.session_state.added_signals)>0):
-    plt.legend(fontsize=8.5, bbox_to_anchor=(1.1, 1.05))
+        for i in range (0,len(st.session_state.added_signals)):
+            ax.plot(st.session_state.added_signals[i]['x'], st.session_state.added_signals[i]['y'],
+            label=st.session_state.added_signals[i]['name'])
+            ax.legend(fontsize=8.5, bbox_to_anchor=(1.1, 1.05))
 
-
-    for i in range (0,len(st.session_state.added_signals)):
-        ax.plot(st.session_state.added_signals[i]['x'], st.session_state.added_signals[i]['y'],
-        label=st.session_state.added_signals[i]['name'])
-        plt.legend(fontsize=8.5, bbox_to_anchor=(1.1, 1.05))
-
-if uploaded_file is None:
-    st.pyplot(fig)
+    if uploaded_file is None:
+        st.pyplot(fig)
