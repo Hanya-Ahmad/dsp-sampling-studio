@@ -26,6 +26,5 @@
 
 * Add noise to the signal and control the signal-to-noise ratio (SNR) in both composer and uploaded file
 ![Screenshot (69)](https://user-images.githubusercontent.com/93945902/199555969-072bc7f9-4ab7-4c99-b775-aaaabee8cc2a.png)
-
 ![Screenshot (59)](https://user-images.githubusercontent.com/93945902/199199156-749da990-5f3d-4799-87f5-c7cb1567089c.png)
 
