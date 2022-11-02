@@ -9,7 +9,7 @@
 
 ## Project Description:
 ### This project is a real-time sampling studio where users can
-* Compose their own signal by adding multiple sinusoidals and the summation signal is plotted automatically
+* Compose their own signal by adding multiple cosinusoidals and the summation signal is plotted automatically
 ![Screenshot (65)](https://user-images.githubusercontent.com/93945902/199555277-1c7b4405-0c29-4b85-aa6b-5ce6a272cf9d.png)
 
 *Note: The default wave name is an auto-incremented number*
