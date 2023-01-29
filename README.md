@@ -1,11 +1,6 @@
 # Sampling Studio
 
-## Course: DSP
-## Semester: Third Year SBME First Semester
-## Members Names: 
-### Hanya Ahmad   sec:2 BN:51
-### Aisha Amr     sec:1 BN:51
-### Nourhan Sayed sec:2 BN:47
+
 
 ## Project Description:
 ### This project is a real-time sampling studio where users can
